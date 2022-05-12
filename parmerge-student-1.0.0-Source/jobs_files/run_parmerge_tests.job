@@ -16,17 +16,16 @@ CASE="merge1"
 #CASE="merge3"
 
 #### my stuff ####
-# NLIST=(23)
-# MLIST=(23)
+# NLIST=(10)
+# MLIST=(10)
 # PLIST=(2)
 NOW=$(date +"%T")
-HOME="/home/student/pc22s193/UE1/parmerge-student-1.0.0-Source" # change accordinly
-OUT_FOLDER="${HOME}/job_outputs/${CASE}/run_${NOW}/"
+SOURCE_ROOT="$HOME/UE1/parmerge-student-1.0.0-Source"
+OUT_FOLDER="${SOURCE_ROOT}/job_outputs/${CASE}/run_${NOW}/"
 $(mkdir ${OUT_FOLDER})
 #### end my stuff #### 
 
-
-BINARY="../bin/${CASE}_tester"
+BINARY="${SOURCE_ROOT}/bin/${CASE}_tester"
 
 NL=${#NLIST[@]}
 
