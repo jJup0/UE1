@@ -1,0 +1,9 @@
+bin/
+CMakeFiles/
+*.cmake
+CMakeCache.txt
+Makefile
+u1_sol_template/solution_u1.aux
+u1_sol_template/solution_u1.log
+u1_sol_template/solution_u1.synctex.gz
+u1_sol_template/solution_u1.pdf

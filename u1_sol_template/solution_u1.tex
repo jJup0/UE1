@@ -121,22 +121,31 @@ for (i=0; i<n; i++) a[i] = b[i];
 
 
 \exercise{3}
-
+\begin{lstlisting}
+# pragma omp parallel for schedule ( runtime )
+for (i = 0; i < n ; i++) {
+  a[i] = omp_get_thread_num();
+  t[omp_get_thread_num()]++;
+}
+\end{lstlisting}
 \answer{1}
+a[i] tracks which thread executed iteration \emph{i} in the for loop.
+t[i] tracks how many iterations were executed by thread \emph{i}.
 
 \answer{2}
+
 
 \begin{tabular}{rrrrrrrrrrrrrrrrrrrr}
   \toprule
  case /  $i$ & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 & 13 & 14 & 15 & 16 & 17 & 18  \\
   \midrule
-\texttt{static} &  \multicolumn{8}{c}{insert thread ids}\\
-\texttt{static,2} & \\
-\texttt{static,5} & \\
-\texttt{static,6} & \\ 
-\texttt{dynamic,1} & \\
-\texttt{dynamic,2} & \\
-  \texttt{guided,3} & \\
+\texttt{static}     & 0 & 0 & 0 & 1 & 1 & 1 & 2 & 2 & 2 & 3 & 3 & 3 & 4 & 4 & 4 & 5 & 5 & 5 & 0 \\
+\texttt{static,2}   & 0 & 0 & 1 & 1 & 2 & 2 & 3 & 3 & 4 & 4 & 5 & 5 & 0 & 0 & 1 & 1 & 2 & 2 & 3 \\
+\texttt{static,5}   & 0 & 0 & 0 & 0 & 0 & 1 & 1 & 1 & 1 & 1 & 2 & 2 & 2 & 2 & 2 & 3 & 3 & 3 & 3 \\
+\texttt{static,6}   & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 1 & 1 & 1 & 1 & 1 & 2 & 2 & 2 & 2 & 2 & 2 & 3 \\ 
+\texttt{dynamic,1}  & 0 & 1 & 2 & 3 & 4 & 5 & 0 & 1 & 2 & 3 & 4 & 5 & 0 & 1 & 2 & 3 & 4 & 5 & 0 \\
+\texttt{dynamic,2}  & 0 & 0 & 1 & 1 & 2 & 2 & 3 & 3 & 4 & 4 & 5 & 5 & 0 & 0 & 1 & 1 & 2 & 2 & 3 \\
+  \texttt{guided,3} & 0 & 0 & 0 & 1 & 1 & 1 & 2 & 2 & 2 & 3 & 3 & 3 & 4 & 4 & 4 & 5 & 5 & 5 & 0 \\
   \bottomrule
 \end{tabular}\\
 
@@ -144,18 +153,19 @@ for (i=0; i<n; i++) a[i] = b[i];
   \toprule
 case / $t$             & $t[0]$ & $t[1]$ & $t[2]$ & $t[3]$ & $t[4]$ & $t[5]$ \\  
   \midrule
-\texttt{static} & \\
-\texttt{static,2} & \\
-\texttt{static,5} &  \\
-\texttt{static,6} &  \\
-\texttt{dynamic,1} &  \\
-\texttt{dynamic,2} &  \\
-\texttt{guided,3} &  \\
+\texttt{static}    & 4 & 3 & 3 & 3 & 3 & 3 \\
+\texttt{static,2}  & 4 & 4 & 4 & 3 & 2 & 2 \\
+\texttt{static,5}  & 5 & 5 & 5 & 4 & 0 & 0 \\
+\texttt{static,6}  & 6 & 6 & 6 & 1 & 0 & 0 \\
+\texttt{dynamic,1} & 4 & 3 & 3 & 3 & 3 & 3 \\
+\texttt{dynamic,2} & 4 & 4 & 4 & 3 & 2 & 2 \\
+\texttt{guided,3}  & 4 & 3 & 3 & 3 & 3 & 3 \\
     \bottomrule
 \end{tabular}
 
 \answer{3}
-
+False sharing is a possible performance issue:
+Multiple threads (on different cores) may want to access t (at different indexes) at close points in time. If two indexes i, j are close enough and positioned in a way that t[i] and t[j] are on the same cache line, and t[i] t[j] are accessed by different threads, they will be ``falsely shared'' and cache coherency activity will occur, which impacts performance considerably. 
 
 \exercise{4}
 
@@ -169,8 +179,21 @@ while (j<m) C[k++] = B[j++];
 \end{lstlisting}
 
 \answer{1}
+Assuming i, j, k are in registers. \\
+Example for a best case input for A and B:
+A = [0,0,0,0 ...] 
+B = [1,1,1,1 ...] \\
+This way A[0] will be fetched with a cache miss, then B[0] will be fetched with a cache miss (stored in a register afterwards), overwriting the cache line with A[0] stored. Then A[0] will be inserted at C[0].
+Then A[1] will be fetched, resulting in a cache miss, however the rest of A will be fetched and inserted into C, resulting in a cache miss every 16 elements. \\
+Then all of B will be inserted into C, also resulting in a cache miss every 16 elements. \\
+Total cache misses: 2 + 2n/16 = 2 + n/8, \textbf{cache miss rate:} 1/16
 
 \answer{2}
+Example for a worst case input for A and B:
+A = [1,2,3,4 ...] 
+B = [1,2,3,4 ...] \\
+If A and B contain the same values that are also strictly increasing, alternating at every iteration first A[i] <= B[j] will hold, and in the next A[i] > B[j]. At every iteration a new element has to be fetched from memory, but a miss will always occur, as the cache line will contain elements from A[i] when an element from B[j] is needed, and vice versa.  
+Total cache misses: 2n, \textbf{cache miss rate:} 1.0
 
 \exercise{5}
 
@@ -206,10 +229,18 @@ void merge_corank(double A[], int n, double B[], int m, double C[])
 \end{lstlisting}
 
 \answer{1}
+A parallel section is opened, with to omp for constructs. In the first for-construct every element in \emph{A} is ranked in the array \emph{B} and inserted accordingly in \emph{C}. It is marked as no wait, as there are no data conflicts. In the second for-consrtuct every element in \emph{B} is ranked in the array \emph{A} and then inserted accordingly in \emph{C}. Ranking is done sequentially by binary search in O(log(n)), inserting into \emph{C} is done for n + m elements in parallel, in O(1) time. Therefore the runtime is O((n + m)/p * log(n)).
 
 \answer{2}
+TODO plots
 
 \answer{3}
+To make the merge stable, nothing has to be done to preserve relative order of equal elements in A as well as B in C.
+To make sure equal elements of A come before equal elements of B: \\
+Rewrite rank algorithm:\\
+rank{\_}for{\_}A(a, B, m) returns a j such that B[j] < a <= B[j + 1] \\
+and another algorithm: \\
+rank{\_}for{\_}B(b, A, n) returns an i such that A[i] <= b < A[i + 1]
 
 \answer{4}
 

@@ -1,0 +1,3 @@
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+slurmstepd: error: *** STEP 1598940.14 ON hydra01 CANCELLED AT 2022-05-12T12:04:42 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 1598940 ON hydra01 CANCELLED AT 2022-05-12T12:04:42 DUE TO TIME LIMIT ***
