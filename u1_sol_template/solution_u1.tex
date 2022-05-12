@@ -60,8 +60,8 @@ TU Wien}
 \vspace*{1ex}
 
 \noindent
-1: First name, Last name, Matrikel\\
-2: First name, Last name, Matrikel\\
+1: Jakob, Roithinger, 52009269\\
+2: Elias, Pinter, 12023962\\
 3: First name, Last name, Matrikel
 
 \vspace*{1ex}
@@ -86,10 +86,98 @@ void mv(int m, int n, double M[m][n], double V[n], double W[m])
 \end{lstlisting}
 
 \answer{1}
+\begin{lstlisting}
+void mv(int m, int n, double M[m][n], double V[n], double W[m]){
+  par(0<=i<n){
+    W[i] = 0.0;
+    for(int j = 0; i < n; j++){
+    	
+      // summing into each cell in result vector 
+      W[i] += M[i][j] * V[j];
+    }
+  }
+}
 
+using the CREW PRAM model
+\end{lstlisting}
+\newpage
 \answer{2}
+\begin{lstlisting}
+void mv(int m, int n, double M[m][n], double V[n], double W[m]){
+  double C[m][n];
+  par(0<=i<m, 0<=j<n){
+  	
+    // calculating summands in O(1)time
+    M[i][j] *= V[j];
 
+    
+    // summing in O(log(n)) time
+    int offset = 1;
+    int betweenGap = 2;
+    while(offset < n){
+      if(offset + j * betweenGap >= n){
+        noop;
+      }
+      else{
+        M[i][j * betweenGap] += M[i][offset + j * betweenGap]
+      }
+      offset *= 2;
+      betweenGap*=2;
+    }
+
+    // copying into result vector in O(1) time
+    W[i] = M[i][0];
+  }
+
+using the CREW PRAM model
+
+\end{lstlisting}
+\newpage
 \answer{3}
+\begin{lstlisting}
+void mv(int m, int n, double M[m][n], double V[n], double W[m]){
+  double C[m][n];
+  par(0<=i<m, 0<=j<n){
+  	
+    // copying vector in O(log(n)) time
+    C[0][j] = V[j];
+    range = 2;
+    offset = 1;
+    while(offset < m){
+      if(i + offset >= range && i + offset >= m){
+        noop;
+      }
+      else{
+        C[i + offset][j] = C[i][j];
+        offset *= 2;
+        range *= 2;
+      }
+    }
+		
+    // calculating summands in O(1)time
+    M[i][j] = M[i][j] * C[i][j];
+
+    
+    // summing in O(log(n)) time
+    int offset = 1;
+    int betweenGap = 2;
+    while(offset < n){
+      if(offset + j * betweenGap >= n){
+        noop;
+      }
+      else{
+        M[i][j * betweenGap] += M[i][offset + j * betweenGap]
+      }
+      offset *= 2;
+      betweenGap*=2;
+    }
+
+    // copying into result vector in O(1) time
+    W[i] = M[i][0];
+  }
+
+using the EREW PRAM model	
+\end{lstlisting}
 
 \exercise{2}
 
