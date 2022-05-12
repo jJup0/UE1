@@ -1,0 +1,31 @@
+#! /bin/bash
+  
+#SBATCH -p q_student
+#SBATCH -N 8
+#SBATCH --cpu-freq=High
+#SBATCH --time=5:00
+
+# modify parameters accordingly
+
+PPN=(1 16 32)
+NLIST=(300 600 1200 12000)
+NREP=20
+
+TEST="mv1"
+TEST="mv2"
+
+BINARY="../bin/${TEST}"
+
+nlen=${#NLIST[@]}
+plen=${#PPN[@]}
+
+for (( i=0; i<${nlen}; i++ ));
+do
+   n=${NLIST[$i]}
+   for (( j=0; j<${plen}; j++ ));
+   do
+      ppn=${PPN[$j]}
+      srun --ntasks-per-node=$ppn ${BINARY} -n $n -r ${NREP} > "output_${TEST}_${ppn}_${n}.out"
+   done
+   srun -N 1 --ntasks-per-node=1 ${BINARY} -n $n -r ${NREP} > "output_${TEST}_seq_${n}.out"
+done

@@ -1,0 +1,23 @@
+#! /bin/bash
+
+#SBATCH -p q_student
+#SBATCH -N 1                 
+#SBATCH -c 32   # use all 32 cores 
+#SBATCH --cpu-freq=High
+#SBATCH --time=5:00
+
+NLIST=(1000000 10000000 100000000)
+MLIST=(2000000 20000000 200000000)
+PLIST=(2 4 8 11 16 32)
+NREP=10
+
+BINARY="../bin/merge1_tester"
+
+NL=${#NLIST[@]}
+
+for (( i=0; i<$NL; i++ ));
+do
+  n=${NLIST[$i]}
+  m=${MLIST[$i]}
+  srun ${BINARY} -n $n -m $m -s -r $NREP  > "output_seq_${n}_${m}_1.out"
+done

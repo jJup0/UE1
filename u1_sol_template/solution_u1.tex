@@ -1,0 +1,262 @@
+\documentclass[a4paper,%
+11pt,%
+DIV=12,
+headsepline,%
+headings=normal,
+]{scrartcl}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[automark]{scrlayer-scrpage}
+\usepackage{graphicx}
+\usepackage{lmodern} 
+\usepackage{url}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{listings}
+
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  frame=single
+}
+
+\newcounter{curex}
+\setcounter{curex}{0}
+\newcommand{\exercise}[1]{\section*{Exercise #1}\setcounter{curex}{#1}}
+\newcommand{\answer}[1]{\subsection*{Answer \arabic{curex}.#1}}
+
+\begin{document}
+
+\noindent
+\vspace*{1ex}
+\begin{minipage}[t]{.45\linewidth}
+\strut\vspace*{-\baselineskip}\newline
+\includegraphics[height=.9cm]{./figs/Inf-Logo_black_en-eps-converted-to.pdf}
+\includegraphics[height=.9cm]{./figs/par-logo}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{.5\linewidth}
+\flushright{
+Research Group for Parallel Computing\\%
+Faculty of Informatics\\%
+TU Wien}
+\end{minipage}
+\vspace*{1ex}
+
+\hrule 
+
+\vspace*{2ex}
+
+\begin{center}
+{\LARGE\textbf{Parallel Computing}}\\
+{\large{}%
+  2022S\\
+  Übungsblatt 1\\
+}
+\end{center}
+
+\hrule 
+\vspace*{1ex}
+
+\noindent
+1: First name, Last name, Matrikel\\
+2: First name, Last name, Matrikel\\
+3: First name, Last name, Matrikel
+
+\vspace*{1ex}
+\hrule 
+
+\exercise{1}
+
+The source code snippets are just given here in case you would like to reuse them.
+You can remove them in your solution if you want.
+\begin{lstlisting}
+void mv(int m, int n, double M[m][n], double V[n], double W[m])
+{
+  int i, j;
+
+  for (i=0; i<m; i++) {
+    W[i] = 0.0;
+    for (j=0; j<n; j++) {
+      W[i] += M[i][j]*V[j];
+    }
+  }
+}
+\end{lstlisting}
+
+\answer{1}
+
+\answer{2}
+
+\answer{3}
+
+\exercise{2}
+
+\begin{lstlisting}
+for (i=0; i<n; i++) {
+  int count = 0;
+  for (j=0; j<i; j++) {
+    if (a[j]<=a[i]) count++;
+  }
+  j++;
+  for (; j<n; j++) {
+    if (a[j]<a[i]) count++;
+  }
+  b[count] = a[i];
+}
+for (i=0; i<n; i++) a[i] = b[i];
+\end{lstlisting}
+
+\answer{1}
+
+\answer{2}
+
+\answer{3}
+
+\answer{4}
+
+\answer{5}
+
+
+
+\exercise{3}
+
+\answer{1}
+
+\answer{2}
+
+\begin{tabular}{rrrrrrrrrrrrrrrrrrrr}
+  \toprule
+ case /  $i$ & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 & 13 & 14 & 15 & 16 & 17 & 18  \\
+  \midrule
+\texttt{static} &  \multicolumn{8}{c}{insert thread ids}\\
+\texttt{static,2} & \\
+\texttt{static,5} & \\
+\texttt{static,6} & \\ 
+\texttt{dynamic,1} & \\
+\texttt{dynamic,2} & \\
+  \texttt{guided,3} & \\
+  \bottomrule
+\end{tabular}\\
+
+\begin{tabular}{rrrrrrr}
+  \toprule
+case / $t$             & $t[0]$ & $t[1]$ & $t[2]$ & $t[3]$ & $t[4]$ & $t[5]$ \\  
+  \midrule
+\texttt{static} & \\
+\texttt{static,2} & \\
+\texttt{static,5} &  \\
+\texttt{static,6} &  \\
+\texttt{dynamic,1} &  \\
+\texttt{dynamic,2} &  \\
+\texttt{guided,3} &  \\
+    \bottomrule
+\end{tabular}
+
+\answer{3}
+
+
+\exercise{4}
+
+\begin{lstlisting}
+i = 0; j = 0; k = 0; 
+while (i<n&&j<m) {
+   C[k++] = (A[i]<=B[j]) ? A[i++] : B[j++]; 
+}
+while (i<n) C[k++] = A[i++]; 
+while (j<m) C[k++] = B[j++];
+\end{lstlisting}
+
+\answer{1}
+
+\answer{2}
+
+\exercise{5}
+
+\answer{1}
+
+\answer{2}
+
+\answer{3}
+
+\exercise{6}
+
+\begin{lstlisting}
+void merge_corank(double A[], int n, double B[], int m, double C[])
+{
+  int t; // number of blocks (threads)
+  int i;
+  
+  int coj[t+1];
+  int cok[t+1];
+  
+  for (i=0; i<t; i++) {
+    corank(i*(n+m)/t,A,n,&coj[i],B,m,&cok[i]);
+  }
+  coj[t] = n;
+  cok[t] = m;
+  
+  for (i=0; i<t; i++) {
+    merge(&A[coj[i]],coj[i+1]-coj[i],
+	  &B[cok[i]],cok[i+1]-cok[i],
+	  &C[i*(n+m)/t]);
+  }
+}
+\end{lstlisting}
+
+\answer{1}
+
+\answer{2}
+
+\answer{3}
+
+\answer{4}
+
+\exercise{7}
+
+\begin{lstlisting}
+void merge_divconq(double A[], int n, double B[], int m, double C[])
+{
+  int i;
+
+  if (n==0) { // task parallelize for large n
+    for (i=0; i<m; i++) C[i] = B[i];
+  } else if (m==0) { // task parallelize for large m
+    for (i=0; i<n; i++) C[i] = A[i];
+  } else if (n+m<CUTOFF) {
+    merge(A,n,B,m,C); // sequential merge for small problems
+  } else {
+    int r = n/2;
+    int s = rank(A[r],B,m);
+    C[r+s] = A[r];
+    merge_divconq(A,r,B,s,C);
+    merge_divconq(&A[r+1],n-r-1,&B[s],m-s,&C[r+s+1]);
+  }
+}
+\end{lstlisting}
+
+\answer{1}
+
+\answer{2}
+
+\answer{3}
+
+\exercise{8}
+
+\answer{1}
+
+\answer{2}
+
+\answer{3}
+
+\exercise{9}
+
+\answer{1}
+
+\answer{2}
+
+\answer{3}
+
+
+\end{document}
