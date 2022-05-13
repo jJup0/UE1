@@ -5,139 +5,83 @@
  *      Author: Elias
  */
 
-
+#include <math.h>
+#include <omp.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <omp.h>
-#include <math.h>
+
 #include "merge.h"
 
-typedef struct{
-  long j;
-  long k;
-}Coranks;
-
-void printDoubleArray(double* array, long n){
-  fprintf(stderr, "[%f", array[0]);
-  for(int i = 1; i < n; i++){
-    fprintf(stderr, ", %f", array[i]);
-  }
-  fprintf(stderr, "]\n");
-}
-
-void printLongArray(long* array, long n){
-  fprintf(stderr, "[%ld", array[0]);
-  for(int i = 1; i < n; i++){
-    fprintf(stderr, ", %ld", array[i]);
-  }
-  fprintf(stderr, "]\n");
-}
-
-long min(long a, long b){
-  return (a <= b) ? a : b;
-}
-
-long max(long a, long b){
-  return (a > b) ? a : b;
-}
-
-Coranks corank(long index, double a[] , long n, double b[], long m, double c[]){
-  fprintf(stderr, "%s", "starting to calculate coranks ... \n\n");
-
-
-
-  long j = min(index, n);
-  // Because j + k = index 
-  long k = index - j;
-  long j_low = max(0, index-m);
-  long k_low = 0;
-  long delta;
-  int all_lemmas_statisfied = 0;
-  Coranks coranks = {0, 0};
-
-  while(!all_lemmas_statisfied){
-    if(j > 0 && k < m && a[j-1] > b[k]){
-      delta = ceil((j - j_low)/2);
-      k_low = k;
-      j -= delta;
-      k += delta;
+void printLongArray(long* array, long n) {
+    fprintf(stderr, "[%ld", array[0]);
+    for (long i = 1; i < n; i++) {
+        fprintf(stderr, ", %ld", array[i]);
     }
-    else if(k > 0 && j < n && b[k-1] >= a[j]){
-      delta = ceil((k-k_low)/2);
-      j_low = j;
-      j += delta;
-      k -= delta;
-    }
-    else{
-      fprintf(stderr, "j: %ld\n", j);
-      fprintf(stderr, "k: %ld\n\n", k);
-      coranks.j = j;
-      coranks.k = k;
-      all_lemmas_statisfied = 1;
-    }
-  }
-  return coranks;
+    fprintf(stderr, "]\n");
 }
 
-void merge(double a[], long n, double b[], long m, double c[]) {
-  fprintf(stderr, "%s", "starting corank_merge ... \n\n");
+void printIntArray(int* array, int n) {
+    fprintf(stderr, "[%d", array[0]);
+    for (int i = 1; i < n; i++) {
+        fprintf(stderr, ", %d", array[i]);
+    }
+    fprintf(stderr, "]\n");
+}
 
-  // printing array a;
-  fprintf(stderr, "array a :");
-  printDoubleArray(a, n);
+int min(int A, int b) { return (A <= b) ? A : b; }
 
-  // printing array b;
-  fprintf(stderr, "array b :");
-  printDoubleArray(b, m);
+int max(int A, int b) { return (A > b) ? A : b; }
 
-  // printing array b;
-  fprintf(stderr, "array c :");
-  printDoubleArray(c, n+m);
+void corank(int i, double A[], long m, int* corank_a, double B[], long n, int* corank_b) {
+    int j = min(i, m);
+    // Because j + k = i
+    int k = i - j;
+    int j_low = max(0, i - n);
+    int k_low = 0;  // uninit in pseudo code
+    int delta;
+    int active = 0;
 
+    while (!active) {
+        if (j > 0 && k < n && A[j - 1] > B[k]) {
+            delta = ceil((j - j_low) / 2);
+            k_low = k;
+            j -= delta;
+            k += delta;
+        } else if (k > 0 && j < m && B[k - 1] >= A[j]) {
+            delta = ceil((k - k_low) / 2);
+            j_low = j;
+            j += delta;
+            k -= delta;
+        } else {
+            *corank_a = j;
+            *corank_b = k;
+            active = 1;
+        }
+    }
+}
 
+void merge(double A[], long n, double B[], long m, double C[]) {
+    int coj[omp_get_max_threads() + 1];
+    int cok[omp_get_max_threads() + 1];
 #pragma omp parallel
-  {
-    int t = omp_get_num_threads();
-    long coranks_a [t+1];
-    long coranks_b [t+1];
+    {
+        int t = omp_get_num_threads();
+        int i;
 
-    fprintf(stderr, "%s", "calculating coranks ... \n\n");
-#pragma omp for nowait
-    for(int i = 0; i < t; i++){
-      Coranks coranks = corank(i*(n+m)/t, a, n, b, m, c);
-      coranks_a[i] = coranks.j;
-      coranks_b[i] = coranks.k; 
+#pragma omp for
+        for (i = 0; i < t; i++) {
+            corank(i * (n + m) / t, A, n, &coj[i], B, m, &cok[i]);
+        }
+        coj[t] = n;
+        cok[t] = m;
+
+#pragma omp for
+        for (i = 0; i < t; i++) {
+            seq_merge1(&A[coj[i]], coj[i + 1] - coj[i], &B[cok[i]], cok[i + 1] - cok[i], &C[i * (n + m) / t]);
+        }
     }
-    coranks_a[t] = n;
-    coranks_b[t] = m;
-    fprintf(stderr, "%s", "calculated coranks ... \n\n");
-
-
-
-
-    fprintf(stderr, "%s", "merging block from a and b into corresponding block in c ... \n\n");
-#pragma omp for nowait
-    for(int i = 0; i < t; i++){
-      // printing array coranks_a;
-      fprintf(stderr, "array coranks_a :");
-      printLongArray(coranks_a, t+1);
-
-      // printing array coranks_b;
-      fprintf(stderr, "array coranks_b :");
-      printLongArray(coranks_b, t+1);
-      long lower_a = coranks_a[i];
-      long upper_a = coranks_a[i+1];
-      double* block_a = &a[lower_a];
-      long block_a_length = upper_a - lower_a;
-      long lower_b = coranks_b[i];
-      long upper_b = coranks_b[i+1];
-      double* block_b = &b[lower_b];
-      long block_b_length = upper_b - lower_b;
-      double* block_c = &c[i*(n+m)/t];
-      fprintf(stderr, "starting sequential merge with block_a_length: %ld,  block_b_length: %ld\n\n", block_a_length, block_b_length);
-      seq_merge1(block_a, block_a_length, block_b, block_b_length, block_c);
-    }
-  }
 }
 
-
+/*
+ ./bin/merge2_tester -n 100 -m 80 -p 4 -c
+*/
