@@ -1,3 +1,4 @@
+/.vscode/
 bin/
 CMakeFiles/
 *.cmake
@@ -9,3 +10,5 @@ u1_sol_template/solution_u1.synctex.gz
 u1_sol_template/solution_u1.pdf
 u1_sol_template/solution_u1.fdb_latexmk
 u1_sol_template/solution_u1.fls
+exercisesandprojects.pdf
+/testing/
