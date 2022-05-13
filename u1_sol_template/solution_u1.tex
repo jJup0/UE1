@@ -197,14 +197,74 @@ for (i=0; i<n; i++) a[i] = b[i];
 \end{lstlisting}
 
 \answer{1}
+The program sorts a given arra of integers in ascending order. A comparison with "$a \leq \ $b" has to be done in some range, if the method is also supposed to work with arrays holding duplicates. If this is not done, all duplicates will end up on the same position, causing ''gaps'' (array position will have standard initialization like 0 or null) in the result. If "$a \leq \ $b" is used in the place where it is in the current code, it will guarantee stability. This means that the order of equal elements in the input will be sustained in the output.
 
 \answer{2}
+The asymptotic sequential work of the given algorithm is O(n$^{2}$). The outer loop is executed n times. Within this loop, there are tow nested loops which both are executed O(n) times. Outside the outer loop, there is another loop which is executed n times. Every operation in- and outside the loops does have constant work. This concludes to the work of O(n$^{2}$). Here is the code once again, with explanation regarding work in the comments:
+
+\begin{lstlisting}
+for (i=0; i<n; i++) {            // canonical loop dependent on n
+  int count = 0;                 // constant work
+  for (j=0; j<i; j++) {          // canonical loop dependent on i
+    if (a[j]<=a[i]) count++;     // constant work
+  }
+  j++;                           // constant work
+  for (; j<n; j++) {             // linear loop dependent on the i-loop and n
+    if (a[j]<a[i]) count++;      // constant work
+  }
+  b[count] = a[i];               // constant work
+}
+for (i=0; i<n; i++)              // canonical loop dependent on n
+  a[i] = b[i];                   // constant work
+\end{lstlisting}
+\begin{math}n*(1 + n*(1) + 1 + n*(1) + 1) + n*(1) =\end{math}\\
+\begin{math}n*(n + 3) + n =\end{math}\\
+\begin{math}n^2 + 4n\end{math}\\
+\begin{math}n^2 + 4n \in O(n^2)\end{math}\\
+This is a very simplified calculation. The j-loop's workload rises as the i-loop's workload shrinks. Generally, within one outer-loop iteration, the sum of the iterations of the first and second j-loop together is n. However, it does not make in difference for the big O notation.
 
 \answer{3}
+\begin{lstlisting}
+#include <omp.h>
+...
+a = (int*)malloc(n*sizeof(a*));
+#pragma omp parallel default(none)
+firstprivate(a){
+ int i;
+ int block = n/omp_get_num_threads();
+ int start = omp_get_thread_num()*block;
+ int end = start+block;
+  for (i=0; i<n; i++) {
+   int count = 0;
+   for (j=0; j<i; j++) {
+     if (a[j]<=a[i]) count++;
+   }
+   j++;
+   for (; j<n; j++) {
+     if (a[j]<a[i]) count++;
+   }
+   b[count] = a[i];
+ }
+}
+// implicit barrier
+#pragma omp parallel default(none)
+b = (int*)malloc(n*sizeof(b*));
+firstprivate(b){
+ for (i=0; i<n; i++) a[i] = b[i];
+}
+\end{lstlisting}
 
 \answer{4}
+The outer loop is embarrassingly parallel, because the iterations are independent of each other. Therefore, the speedup is linear (compared to the sequential execution of this algorithm). The runtime will be in:\\
+\begin{math}O(\frac{n^2}{p})\end{math}\\
 
 \answer{5}
+Relative speedup will be linear as long as $p \leq n$.\\
+
+\begin{math}SRel_{p}(n)=\frac{T_{par}(1,n)}{T_{par}(p,n)} = \frac{n^2}{n^2/p} = p \end{math}\\
+The absolute speedup has to be compared with the best known sequantial algorithm for this problem (sorting). Mergesort is on of these, running in \begin{math}O(n*log(n))\end{math}. The absulote speed-up is not linear.\\
+
+\begin{math}S_{p}(n)=\frac{T_{seq}(n)}{T_{par}(p,n)} = \frac{n*log(n)}{n^2/p} = \frac{log(n)*p}{n} \end{math}\\
 
 
 
