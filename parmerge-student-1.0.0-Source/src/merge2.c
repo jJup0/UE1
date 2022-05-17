@@ -34,14 +34,13 @@ int max(int A, int b) { return (A > b) ? A : b; }
 
 void corank(int i, double A[], long m, int* corank_a, double B[], long n, int* corank_b) {
     int j = min(i, m);
-    // Because j + k = i
-    int k = i - j;
+    int k = i - j;  // Because j + k = i
     int j_low = max(0, i - n);
     int k_low = 0;  // uninit in pseudo code
     int delta;
-    int active = 0;
+    int active = 20;
 
-    while (!active) {
+    while (active > 0) {
         if (j > 0 && k < n && A[j - 1] > B[k]) {
             delta = ceil((j - j_low) / 2);
             k_low = k;
@@ -55,12 +54,26 @@ void corank(int i, double A[], long m, int* corank_a, double B[], long n, int* c
         } else {
             *corank_a = j;
             *corank_b = k;
-            active = 1;
+            return  ;
         }
+        active--;
+        fprintf(stderr, "active: %d, j_low: %d, k_low: %d || B[k-1], B[k] = [%.1f, %.1f] || A[j-1], A[j] = [%.1f, %.1f]  \n", active, j_low, k_low, B[k - 1], B[k], A[j - 1], A[j]);
     }
 }
 
 void merge(double A[], long n, double B[], long m, double C[]) {
+    int t = 10;
+    int coj[t + 1];
+    int cok[t + 1];
+    int i;
+    for (i = 0; i < t; i++) {
+        corank(i * (n + m) / t, A, n, &coj[i], B, m, &cok[i]);
+    }
+    coj[t] = n;
+    cok[t] = m;
+}
+
+void merge1(double A[], long n, double B[], long m, double C[]) {
     int coj[omp_get_max_threads() + 1];
     int cok[omp_get_max_threads() + 1];
 #pragma omp parallel
