@@ -4,20 +4,22 @@
 
 #include "merge.h"
 
+#define debug fprintf
+
 void printIntArray(int* array, int n) {
-    // fprintf(stderr, "[%d", array[0]);
+    fprintf(stderr, "[%d", array[0]);
     for (int i = 1; i < n; i++) {
-        // fprintf(stderr, ", %d", array[i]);
+        fprintf(stderr, ", %d", array[i]);
     }
-    // fprintf(stderr, "]\n");
+    fprintf(stderr, "]\n");
 }
 
 void printDoubleArray(double* array, int n) {
-    // fprintf(stderr, "[%.0f", array[0]);
+    fprintf(stderr, "[%.0f", array[0]);
     for (int i = 1; i < n; i++) {
-        // fprintf(stderr, ", %.0f", array[i]);
+        fprintf(stderr, ", %.0f", array[i]);
     }
-    // fprintf(stderr, "]\n");
+    fprintf(stderr, "]\n");
 }
 
 int rank(double val, double arr[], int n) {
@@ -35,8 +37,33 @@ int rank(double val, double arr[], int n) {
     return lo;
 }
 
-void divAndConquerMerge(double A[], long n, double B[], long m, double C[], int workDone[]) {
-    // fprintf(stderr, "divandconq: n = %ld, m = %ld\n", n, m);
+void divAndConquerMerge(double A[], long n, double B[], long m, double C[]) {
+    int i;
+    if (n == 0) {
+#pragma omp parallel for
+        for (i = 0; i < m; i++) {
+            C[i] = B[i];
+        }
+    } else if (m == 0) {
+#pragma omp parallel for
+        for (i = 0; i < n; i++) {
+            C[i] = A[i];
+        }
+    } else if (n + m < 10000) {
+        seq_merge1(A, n, B, m, C);
+    } else {
+        int r = n / 2;
+        int s = rank(A[r], B, m);
+        C[r + s] = A[r];
+#pragma omp task shared(A, B, C)
+        { divAndConquerMerge(A, r, B, s, C); }
+#pragma omp task shared(A, B, C)
+        { divAndConquerMerge(&A[r + 1], n - r - 1, &B[s], m - s, &C[r + s + 1]); }
+    }
+}
+
+void divAndConquerMergeDebug(double A[], long n, double B[], long m, double C[], int seq_work_done[]) {
+    // debug(stderr, "divandconq: n = %ld, m = %ld\n", n, m);
 
     int i;
     if (n == 0) {
@@ -50,47 +77,58 @@ void divAndConquerMerge(double A[], long n, double B[], long m, double C[], int 
             C[i] = A[i];
         }
     } else if (n + m < 100) {
-        // fprintf(stderr, "going in seq merge\n");
+        // debug(stderr, "going in seq merge\n");
         seq_merge1(A, n, B, m, C);
-        // fprintf(stderr, "thread [%d] performed seq merge with n = %ld, m =%ld\n", omp_get_thread_num(), n, m);
+        // debug(stderr, "thread [%d] performed seq merge with n = %ld, m =%ld\n", omp_get_thread_num(), n, m);
 #pragma omp critical
-        { workDone[omp_get_thread_num()] = workDone[omp_get_thread_num()] + m + n; }
-        // fprintf(stderr, "out of seq merge\n");
+        { seq_work_done[omp_get_thread_num()] = seq_work_done[omp_get_thread_num()] + m + n; }
+        // debug(stderr, "out of seq merge\n");
     } else {
         int r = n / 2;
         int s = rank(A[r], B, m);
         C[r + s] = A[r];
-#pragma omp task shared(A, B, C, workDone)
+#pragma omp task shared(A, B, C, seq_work_done)
         {
-            // fprintf(stderr, "thread executing this task: %d\n", omp_get_thread_num());
-            divAndConquerMerge(A, r, B, s, C, workDone);
+            // debug(stderr, "thread executing this task: %d\n", omp_get_thread_num());
+            divAndConquerMergeDebug(A, r, B, s, C, seq_work_done);
         }
-#pragma omp task shared(A, B, C, workDone)
-        {
-            // fprintf(stderr, "thread executing this task: %d\n", omp_get_thread_num());
-            divAndConquerMerge(&A[r + 1], n - r - 1, &B[s], m - s, &C[r + s + 1], workDone);
-        }
+        // #pragma omp task shared(A, B, C, seq_work_done)
+        //         {
+        // debug(stderr, "thread executing this task: %d\n", omp_get_thread_num());
+        divAndConquerMergeDebug(&A[r + 1], n - r - 1, &B[s], m - s, &C[r + s + 1], seq_work_done);
+        // }
     }
 }
 
-void merge(double A[], long n, double B[], long m, double C[]) {
-    // fprintf(stderr, "merge: n = %ld, m = %ld\n", n, m);
-
-    int workDone[omp_get_max_threads()];
-    for (int i = 0; i < omp_get_max_threads(); i++) {
-        workDone[i] = 0;
-    }
+void merge_debug(double A[], long n, double B[], long m, double C[]) {
+    // debug(stderr, "merge: n = %ld, m = %ld\n", n, m);
+    int seq_work_done[omp_get_max_threads()];
+    for (int i = 0; i < omp_get_max_threads(); i++) seq_work_done[i] = 0;
 #pragma omp parallel
     {
 #pragma omp single
         {
             omp_set_nested(1);
-            divAndConquerMerge(A, n, B, m, C, workDone);
-            // fprintf(stderr, "done\n");
+            divAndConquerMergeDebug(A, n, B, m, C, seq_work_done);
         }
     }
-    printIntArray(workDone, omp_get_max_threads());
-    // printDoubleArray(C, m + n);
+    printIntArray(seq_work_done, omp_get_max_threads());
+}
+
+void merge(double A[], long n, double B[], long m, double C[]) {
+    if (1) {
+        fprintf(stderr, "DEBUG VERSION CALLED\n");
+        merge_debug(A, n, B, m, C);
+    } else {
+#pragma omp parallel
+        {
+#pragma omp single
+            {
+                omp_set_nested(1);  // to allow parallel for in divAndConquerMerge
+                divAndConquerMerge(A, n, B, m, C);
+            }
+        }
+    }
 }
 /*
  ./bin/merge3_tester -n 100 -m 80 -p 4 -c
