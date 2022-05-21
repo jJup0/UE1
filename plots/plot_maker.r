@@ -48,7 +48,8 @@ for (excercise_folder_name in list.files(path = job_outputs_path)) {
         j = j + 1
         
       }
-      png(file= sprintf("./plot_%s_%s_%d_%d.png",excercise_folder_name, batch_folder_name, ns[i], ms[i]) ,width=1960/2, height=1080/2)
+      png(file= sprintf("./plot_%s_%s_%d_%d.png",excercise_folder_name, batch_folder_name, ns[i], ms[i]) ,width=500, height=300)
+      # svg(file= sprintf("./plot_%s_%s_%d_%d.svg",excercise_folder_name, batch_folder_name, ns[i], ms[i]))
       plot(type="l", xaxt="no",  all_results_for_batch_with_size, main=sprintf("%s: n = %s, m = %s", excercise_folder_name, format(ns[i],big.mark=",",scientific=FALSE), format(ms[i],big.mark=",",scientific=FALSE)))
       axis(1, at = ps)
       dev.off()
