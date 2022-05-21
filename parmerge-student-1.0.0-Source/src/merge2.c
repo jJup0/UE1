@@ -38,9 +38,8 @@ void corank(int i, double A[], long m, int* corank_a, double B[], long n, int* c
     int j_low = max(0, i - n);
     int k_low = 0;  // uninit in pseudo code
     int delta;
-    int active = 20;
 
-    while (active > 0) {
+    while (1) {
         if (j > 0 && k < n && A[j - 1] > B[k]) {
             delta = ceil((j - j_low) / 2);
             k_low = k;
@@ -54,10 +53,9 @@ void corank(int i, double A[], long m, int* corank_a, double B[], long n, int* c
         } else {
             *corank_a = j;
             *corank_b = k;
-            return  ;
+            return;
         }
-        active--;
-        fprintf(stderr, "active: %d, j_low: %d, k_low: %d || B[k-1], B[k] = [%.1f, %.1f] || A[j-1], A[j] = [%.1f, %.1f]  \n", active, j_low, k_low, B[k - 1], B[k], A[j - 1], A[j]);
+        // fprintf(stderr, "active: %d, j_low: %d, k_low: %d || B[k-1], B[k] = [%.1f, %.1f] || A[j-1], A[j] = [%.1f, %.1f]  \n", active, j_low, k_low, B[k - 1], B[k], A[j - 1], A[j]);
     }
 }
 
