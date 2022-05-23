@@ -11,6 +11,8 @@
 
 #include "merge.h"
 
+#define SCHEDULE_STRATEGY schedule(guided, 64)
+
 int rank(double val, double arr[], int n) {
     int lo = 0;
     int hi = n - 1;
@@ -32,13 +34,13 @@ void merge(double a[], long n, double b[], long m, double c[]) {
         int j;
 
         // rank all elements in a, and insert them into c
-#pragma omp for nowait
+#pragma omp for SCHEDULE_STRATEGY nowait
         for (i = 0; i < n; i++) {
             c[i + rank(a[i], b, m)] = a[i];
         }
 
         // rank all elements in b, and insert them into c
-#pragma omp for nowait
+#pragma omp for SCHEDULE_STRATEGY nowait
         for (j = 0; j < m; j++) {
             c[j + rank(b[j], a, n)] = b[j];
         }
@@ -46,7 +48,7 @@ void merge(double a[], long n, double b[], long m, double c[]) {
 }
 /*
 ./bin/merge1_tester -n 10 -m 8 -p 2 -c
-./bin/merge1_tester -n 10000000 -m 20000000 -p 2 -c
+./bin/merge1_tester -n 10000000 -m 20000000 -p 16 -c
 ./bin/merge1_tester -n 100000000 -m 200000000 -p 2 -c
 ./bin/merge1_tester -n 100000000 -m 200000000 -s
 */
