@@ -16,6 +16,9 @@ headings=normal,
 \usepackage{booktabs}
 \usepackage{listings}
 
+\usepackage{graphicx}
+\graphicspath{ {../plots/} }
+
 \lstset{
   basicstyle=\ttfamily\footnotesize,
   frame=single
@@ -25,6 +28,9 @@ headings=normal,
 \setcounter{curex}{0}
 \newcommand{\exercise}[1]{\section*{Exercise #1}\setcounter{curex}{#1}}
 \newcommand{\answer}[1]{\subsection*{Answer \arabic{curex}.#1}}
+
+\newcommand\plotwidth{0.8\textwidth}
+\newcommand\plotheight{0.48\textwidth}
 
 \begin{document}
 
@@ -346,10 +352,27 @@ Total cache misses: 2n, \textbf{cache miss rate:} 1.0
 \exercise{5}
 
 \answer{1}
+A parallel section is opened, with to omp for constructs. In the first for-construct every element in \emph{A} is ranked in the array \emph{B} and inserted accordingly in \emph{C}. It is marked as no wait, as there are no data conflicts. In the second for-consrtuct every element in \emph{B} is ranked in the array \emph{A} and then inserted accordingly in \emph{C}. Ranking is done sequentially by binary search in O(log(n)), inserting into \emph{C} is done for n + m elements in parallel, in O(1) time. Therefore the runtime is O((n + m)/p * log(n)).
+
 
 \answer{2}
 
+% TODO make look nice, use speed up
+
+\includegraphics[width=\plotwidth, height=\plotheight]{plot_merge1_run1_1000000_2000000.png}\\
+\includegraphics[width=\plotwidth, height=\plotheight]{plot_merge1_run1_10000000_20000000.png}\\
+\includegraphics[width=\plotwidth, height=\plotheight]{plot_merge1_run1_100000000_200000000.png}\\
+
+
+
 \answer{3}
+To make the merge stable, nothing has to be done to preserve relative order of equal elements in A as well as B in C.
+To make sure equal elements of A come before equal elements of B: \\
+Rewrite rank algorithm:\\
+rank{\_}for{\_}A(a, B, m) returns a j such that B[j] < a <= B[j + 1] \\
+and another algorithm: \\
+rank{\_}for{\_}B(b, A, n) returns an i such that A[i] <= b < A[i + 1]
+
 
 \exercise{6}
 
@@ -377,18 +400,10 @@ void merge_corank(double A[], int n, double B[], int m, double C[])
 \end{lstlisting}
 
 \answer{1}
-A parallel section is opened, with to omp for constructs. In the first for-construct every element in \emph{A} is ranked in the array \emph{B} and inserted accordingly in \emph{C}. It is marked as no wait, as there are no data conflicts. In the second for-consrtuct every element in \emph{B} is ranked in the array \emph{A} and then inserted accordingly in \emph{C}. Ranking is done sequentially by binary search in O(log(n)), inserting into \emph{C} is done for n + m elements in parallel, in O(1) time. Therefore the runtime is O((n + m)/p * log(n)).
 
 \answer{2}
-TODO plots
 
 \answer{3}
-To make the merge stable, nothing has to be done to preserve relative order of equal elements in A as well as B in C.
-To make sure equal elements of A come before equal elements of B: \\
-Rewrite rank algorithm:\\
-rank{\_}for{\_}A(a, B, m) returns a j such that B[j] < a <= B[j + 1] \\
-and another algorithm: \\
-rank{\_}for{\_}B(b, A, n) returns an i such that A[i] <= b < A[i + 1]
 
 \answer{4}
 
