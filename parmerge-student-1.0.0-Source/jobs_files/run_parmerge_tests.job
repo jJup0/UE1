@@ -11,23 +11,26 @@ MLIST=(2000000 20000000 200000000)
 PLIST=(2 4 8 11 16 32)
 NREP=10
 
-# CASE="merge1"
-CASE="merge2"
-#CASE="merge3"
+CASE="merge1"
+# CASE="merge2"
+# CASE="merge3"
 
 #### my stuff ####
-NLIST=(10)
-MLIST=(20)
-# PLIST=(2)
+NLIST=(100)
+MLIST=(200)
+PLIST=(2)
+
 NOW=$(date +"%D[%T]")
 NOW=${NOW//":"/"_"}
 NOW=${NOW//"/"/"-"}
+
 SOURCE_ROOT="$HOME/UE1/parmerge-student-1.0.0-Source"
 OUT_FOLDER="${SOURCE_ROOT}/job_outputs/${CASE}/run_${NOW}/"
 $(mkdir ${OUT_FOLDER})
 #### end my stuff #### 
 
 BINARY="${SOURCE_ROOT}/bin/${CASE}_tester"
+
 
 NL=${#NLIST[@]}
 
@@ -41,5 +44,8 @@ do
   done
 done
 
-# cd ~/UE1/parmerge-student-1.0.0-Source/jobs_files
-# sbatch run_parmerge_tests.job
+# cd ~/UE1/parmerge-student-1.0.0-Source/jobs_files; sbatch run_parmerge_tests.job
+
+# squeue -u $USER
+# scancel <job-id>
+

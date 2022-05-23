@@ -11,7 +11,20 @@ MLIST=(2000000 20000000 200000000)
 PLIST=(2 4 8 11 16 32)
 NREP=10
 
-BINARY="../bin/merge1_tester"
+#### MY STUFF SEQ ####
+# NLIST=(100)
+# MLIST=(200)
+# PLIST=(2)
+NOW=$(date +"%D[%T]")
+NOW=${NOW//":"/"_"}
+NOW=${NOW//"/"/"-"}
+SOURCE_ROOT="$HOME/UE1/parmerge-student-1.0.0-Source"
+OUT_FOLDER="${SOURCE_ROOT}/job_outputs/seq/run_${NOW}/"
+$(mkdir ${OUT_FOLDER})
+#### END SEQ ####
+
+BINARY="${SOURCE_ROOT}/bin/merge1_tester"
+
 
 NL=${#NLIST[@]}
 
@@ -19,5 +32,5 @@ for (( i=0; i<$NL; i++ ));
 do
   n=${NLIST[$i]}
   m=${MLIST[$i]}
-  srun ${BINARY} -n $n -m $m -s -r $NREP  > "output_seq_${n}_${m}_1.out"
+  srun ${BINARY} -n $n -m $m -s -r $NREP -s > "${OUT_FOLDER}output_seq_${n}_${m}_1.out"
 done
