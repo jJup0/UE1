@@ -116,7 +116,7 @@ void merge_debug(double A[], long n, double B[], long m, double C[]) {
 }
 
 void merge(double A[], long n, double B[], long m, double C[]) {
-    if (1) {
+    if (0) {
         fprintf(stderr, "DEBUG VERSION CALLED\n");
         merge_debug(A, n, B, m, C);
     } else {
@@ -131,6 +131,6 @@ void merge(double A[], long n, double B[], long m, double C[]) {
     }
 }
 /*
- ./bin/merge3_tester -n 100 -m 80 -p 4 -c
+ ../bin/merge3_tester -n 100 -m 80 -p 4 -c
  ./bin/merge3_tester -n 100 -m 80 -p 2 -c
 */
