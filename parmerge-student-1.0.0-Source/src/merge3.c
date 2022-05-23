@@ -37,7 +37,7 @@ int rank(double val, double arr[], int n) {
     return lo;
 }
 
-void divAndConquerMerge(double A[], long n, double B[], long m, double C[]) {
+void divAndConquerMerge(double A[], long n, double B[], long m, double C[], const long CUTOFF) {
     int i;
     if (n == 0) {
 #pragma omp parallel for
@@ -49,16 +49,24 @@ void divAndConquerMerge(double A[], long n, double B[], long m, double C[]) {
         for (i = 0; i < n; i++) {
             C[i] = A[i];
         }
-    } else if (n + m < 10000) {
+    } else if (n + m < CUTOFF) {
         seq_merge1(A, n, B, m, C);
     } else {
+        if (n < m) {
+            double* temp_arr = A;
+            A = B;
+            B = temp_arr;
+            long temp_len = n;
+            n = m;
+            m = temp_len;
+        }
         int r = n / 2;
         int s = rank(A[r], B, m);
         C[r + s] = A[r];
 #pragma omp task shared(A, B, C)
-        { divAndConquerMerge(A, r, B, s, C); }
+        { divAndConquerMerge(A, r, B, s, C, CUTOFF); }
 #pragma omp task shared(A, B, C)
-        { divAndConquerMerge(&A[r + 1], n - r - 1, &B[s], m - s, &C[r + s + 1]); }
+        { divAndConquerMerge(&A[r + 1], n - r - 1, &B[s], m - s, &C[r + s + 1], CUTOFF); }
     }
 }
 
@@ -122,15 +130,18 @@ void merge(double A[], long n, double B[], long m, double C[]) {
     } else {
 #pragma omp parallel
         {
-#pragma omp single
+#pragma omp master
             {
-                omp_set_nested(1);  // to allow parallel for in divAndConquerMerge
-                divAndConquerMerge(A, n, B, m, C);
+                omp_set_nested(1);                                    // to allow parallel for in divAndConquerMerge
+                long CUTOFF = (m + n) / (3 * omp_get_max_threads());  // each thread should perform approximately 3 seq merges
+                divAndConquerMerge(A, n, B, m, C, CUTOFF);
             }
         }
     }
 }
 /*
  ../bin/merge3_tester -n 100 -m 80 -p 4 -c
- ./bin/merge3_tester -n 100 -m 80 -p 2 -c
+ ./bin/merge3_tester -n 10000000 -m 20000000 -p 8 -c
+ ./bin/merge3_tester -n 20000000 -m 10000 -p 8 -c
+ ./bin/merge3_tester -n 10000 -m 20000000 -p 8 -c
 */
