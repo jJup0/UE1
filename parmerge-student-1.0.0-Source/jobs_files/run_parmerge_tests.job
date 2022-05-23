@@ -11,21 +11,23 @@ MLIST=(2000000 20000000 200000000)
 PLIST=(2 4 8 11 16 32)
 NREP=10
 
-CASE="merge1"
+# CASE="merge1"
 # CASE="merge2"
-# CASE="merge3"
+CASE="merge3"
 
 #### my stuff ####
-NLIST=(100)
-MLIST=(200)
-PLIST=(2)
+NLIST=(200000000)
+MLIST=(10)
+PLIST=(2 4 8 11 16 32)
+
+TAGNAME="_TWO_TASKS_WITH_SIZE_BALANCE_LIKE_FOLIEN_TINY_M"
 
 NOW=$(date +"%D[%T]")
 NOW=${NOW//":"/"_"}
 NOW=${NOW//"/"/"-"}
 
 SOURCE_ROOT="$HOME/UE1/parmerge-student-1.0.0-Source"
-OUT_FOLDER="${SOURCE_ROOT}/job_outputs/${CASE}/run_${NOW}/"
+OUT_FOLDER="${SOURCE_ROOT}/job_outputs/${CASE}/run_${NOW}${TAGNAME}/"
 $(mkdir ${OUT_FOLDER})
 #### end my stuff #### 
 
@@ -44,7 +46,7 @@ do
   done
 done
 
-# cd ~/UE1/parmerge-student-1.0.0-Source/jobs_files; sbatch run_parmerge_tests.job
+# cd ~/UE1/parmerge-student-1.0.0-Source/jobs_files; sbatch run_parmerge_tests.job; cd ..
 
 # squeue -u $USER
 # scancel <job-id>
