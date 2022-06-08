@@ -75,12 +75,12 @@ void divAndConquerMergeDebug(double A[], long n, double B[], long m, double C[],
 
     int i;
     if (n == 0) {
-#pragma omp parallel for
+#pragma omp for
         for (i = 0; i < m; i++) {
             C[i] = B[i];
         }
     } else if (m == 0) {
-#pragma omp parallel for
+#pragma omp for
         for (i = 0; i < n; i++) {
             C[i] = A[i];
         }
@@ -132,7 +132,7 @@ void merge(double A[], long n, double B[], long m, double C[]) {
         {
 #pragma omp master
             {
-                omp_set_nested(1);                                    // to allow parallel for in divAndConquerMerge
+                // omp_set_nested(1);                                    // to allow parallel for in divAndConquerMerge
                 long CUTOFF = (m + n) / (3 * omp_get_max_threads());  // each thread should perform approximately 3 seq merges
                 divAndConquerMerge(A, n, B, m, C, CUTOFF);
             }
