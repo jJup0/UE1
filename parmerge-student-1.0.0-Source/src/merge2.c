@@ -12,6 +12,8 @@
 
 #include "merge.h"
 
+#define SCHEDULE_STRATEGY schedule(auto)
+
 void printLongArray(long* array, long n) {
     fprintf(stderr, "[%ld", array[0]);
     for (long i = 1; i < n; i++) {
@@ -60,33 +62,23 @@ void corank(int i, double A[], long m, int* corank_a, double B[], long n, int* c
 }
 
 void merge(double A[], long n, double B[], long m, double C[]) {
-    int t = 10;
-    int coj[t + 1];
-    int cok[t + 1];
-    int i;
-    for (i = 0; i < t; i++) {
-        corank(i * (n + m) / t, A, n, &coj[i], B, m, &cok[i]);
-    }
-    coj[t] = n;
-    cok[t] = m;
-}
-
-void merge1(double A[], long n, double B[], long m, double C[]) {
     int coj[omp_get_max_threads() + 1];
     int cok[omp_get_max_threads() + 1];
 #pragma omp parallel
     {
         int t = omp_get_num_threads();
         int i;
-
-#pragma omp for
+#pragma omp single nowait
+        {
+            coj[t] = n;
+            cok[t] = m;
+        }
+#pragma omp for SCHEDULE_STRATEGY
         for (i = 0; i < t; i++) {
             corank(i * (n + m) / t, A, n, &coj[i], B, m, &cok[i]);
         }
-        coj[t] = n;
-        cok[t] = m;
 
-#pragma omp for
+#pragma omp for SCHEDULE_STRATEGY
         for (i = 0; i < t; i++) {
             seq_merge1(&A[coj[i]], coj[i + 1] - coj[i], &B[cok[i]], cok[i + 1] - cok[i], &C[i * (n + m) / t]);
         }
@@ -94,5 +86,5 @@ void merge1(double A[], long n, double B[], long m, double C[]) {
 }
 
 /*
- ./bin/merge2_tester -n 100 -m 80 -p 4 -c
+ ./bin/merge2_tester -n 10000000 -m 20000000 -p 4 -c
 */
