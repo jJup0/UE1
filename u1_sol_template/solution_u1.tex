@@ -206,7 +206,7 @@ for (i=0; i<n; i++) a[i] = b[i];
 The program sorts a given arra of integers in ascending order. A comparison with "$a \leq \ $b" has to be done in some range, if the method is also supposed to work with arrays holding duplicates. If this is not done, all duplicates will end up on the same position, causing ''gaps'' (array position will have standard initialization like 0 or null) in the result. If "$a \leq \ $b" is used in the place where it is in the current code, it will guarantee stability. This means that the order of equal elements in the input will be sustained in the output.
 
 \answer{2}
-The asymptotic sequential work of the given algorithm is O(n$^{2}$). The outer loop is executed n times. Within this loop, there are tow nested loops which both are executed O(n) times. Outside the outer loop, there is another loop which is executed n times. Every operation in- and outside the loops does have constant work. This concludes to the work of O(n$^{2}$). Here is the code once again, with explanation regarding work in the comments:
+The asymptotic sequential work of the given algorithm is O(n$^{2}$). The outer loop is executed n times. Within this loop, there are two nested loops which have a total of n-1 (= O(n)) iterations. Outside the outer loop, there is another loop which is executed n times. Every operation in- and outside the loops does have constant work. This concludes to the work of O(n$^{2}$). Here is the code once again, with explanation regarding work in the comments:
 
 \begin{lstlisting}
 for (i=0; i<n; i++) {            // canonical loop dependent on n
