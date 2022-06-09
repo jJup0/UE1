@@ -97,7 +97,6 @@ void mv(int m, int n, double M[m][n], double V[n], double W[m]){
   par(0<=i<m){
     W[i] = 0.0;
     for(int j = 0; j < n; j++){
-    	
       // summing into each cell in result vector 
       W[i] += M[i][j] * V[j];
     }
@@ -108,32 +107,34 @@ requires the CREW PRAM model
 \newpage
 \answer{2}
 \begin{lstlisting}
-void mv(int m, int n, double M[m][n], double V[n], double W[m]){
-
-  par(0<=i<m, 0<=j<n){	
-    // calculating summands in O(1)time
+void mv(int m, int n, double M[m][n], double V[n], double W[m]) {
+  
+  par(0<=i<m, 0<=j<n){
+    // doing actual multiplication in O(1) time steps (requires CREW PRAM)
     M[i][j] *= V[j];
   }
   
-  par(0<=i<m, 0<=j<n){
-    // summing in O(log(n)) time
+  par(0<=i<m){
     int offset = 1;
     int betweenGap = 2;
+    // sum row [i] of Matrix in O(log(n)) time steps
     while(offset < n){
-      if(offset + j * betweenGap >= n){
-        noop;
-      }
-      else{
-        M[i][j * betweenGap] += M[i][offset + j * betweenGap]
+      // EREW summing, actually only n/betweenGap processors needed
+      par(0<=j<n) {
+        if(offset + j * betweenGap < n){
+          M[i][j * betweenGap] += M[i][offset + j * betweenGap];
+        }
       }
       offset *= 2;
-      betweenGap*=2;
+      betweenGap *= 2;
     }
   }
-  par(0 <= i < n){
-    // copying into result vector in O(1) time
+  
+  par(0<=i<n){
+    // copying into result vector in O(1) time steps
     W[i] = M[i][0];
   }
+}
 \end{lstlisting}
 requires the CREW PRAM model
 \newpage
@@ -141,48 +142,52 @@ requires the CREW PRAM model
 \begin{lstlisting}
 void mv(int m, int n, double M[m][n], double V[n], double W[m]){
   double C[m][n];
-  par(0 <= j < n){
-    // copying vector into intermediate matrix in O(1) time
+  par(0<=j<n){
+    // copying vector into intermediate matrix in O(1) time steps
     C[0][j] = V[j];
   }
 
-  par(0<=i<m, 0<=j<n){
-    // copying vector in O(log(n)) time
-    range = 2;
-    offset = 1;
-    while(offset < m){
-      if(i + offset >= range && i + offset >= m){
-        noop;
-      }
-      else{
-        C[i + offset][j] = C[i][j];
-        offset *= 2;
-        range *= 2;
+  // making m copies of V in O(log(n)) time steps
+  offset = 1;
+  // O(log(n)) loops
+  while(offset < m){
+    // duplicating existing vectors in O(1)
+    par(0<=i<m){
+      if(i + offset < m){
+        par(0<=j<n){
+          C[i + offset][j] = C[i][j]
+        }
       }
     }
-		
-    // calculating summands in O(1)time
-    M[i][j] = M[i][j] * C[i][j];
+    offset *= 2;
+  }
 
+  par(0<=i<m, 0<=j<n){
+    // calculating summands in O(1) time steps
+    M[i][j] = M[i][j] * C[i][j];
+  }
     
-    // summing in O(log(m)) time
+  par(0<=i<m){
     int offset = 1;
     int betweenGap = 2;
+    // sum row [i] of Matrix in O(log(n)) time steps
     while(offset < n){
-      if(offset + j * betweenGap >= n){
-        noop;
-      }
-      else{
-        M[i][j * betweenGap] += M[i][offset + j * betweenGap]
+      // EREW summing, actually only n/betweenGap processors needed
+      par(0<=j<n) {
+        if(offset + j * betweenGap < n){
+          M[i][j * betweenGap] += M[i][offset + j * betweenGap];
+        }
       }
       offset *= 2;
-      betweenGap*=2;
+      betweenGap *= 2;
     }
   }
-  par(0 < i < n){
-    // copying into result vector in O(1) time
+
+  par(0<=i<n){
+    // copying into result vector in O(1) time steps
     W[i] = M[i][0];
   }
+}
 \end{lstlisting}
 requires the EREW PRAM model
 
@@ -352,7 +357,7 @@ Total cache misses: 2n, \textbf{cache miss rate:} 1.0
 \exercise{5}
 
 \answer{1}
-A parallel section is opened, with to omp for constructs. In the first for-construct every element in \emph{A} is ranked in the array \emph{B} and inserted accordingly in \emph{C}. It is marked as no wait, as there are no data conflicts. In the second for-consrtuct every element in \emph{B} is ranked in the array \emph{A} and then inserted accordingly in \emph{C}. Ranking is done sequentially by binary search in O(log(n)), inserting into \emph{C} is done for n + m elements in parallel, in O(1) time. Therefore the runtime is O((n + m)/p \cdot log(n)).
+A parallel section is opened, with to omp for constructs. In the first for-construct every element in \emph{A} is ranked in the array \emph{B} and inserted accordingly in \emph{C}. It is marked as no wait, as there are no data conflicts. In the second for-consrtuct every element in \emph{B} is ranked in the array \emph{A} and then inserted accordingly in \emph{C}. Ranking is done sequentially by binary search in O(log(n)), inserting into \emph{C} is done for n + m elements in parallel, in O(1) time. Therefore the runtime is $ O((n + m)/p \cdot log(n))$.
 
 
 \answer{2}
@@ -393,8 +398,8 @@ void merge_corank(double A[], int n, double B[], int m, double C[])
   
   for (i=0; i<t; i++) {
     merge(&A[coj[i]],coj[i+1]-coj[i],
-	  &B[cok[i]],cok[i+1]-cok[i],
-	  &C[i*(n+m)/t]);
+    &B[cok[i]],cok[i+1]-cok[i],
+    &C[i*(n+m)/t]);
   }
 }
 \end{lstlisting}
