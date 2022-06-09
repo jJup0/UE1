@@ -94,96 +94,102 @@ void mv(int m, int n, double M[m][n], double V[n], double W[m])
 \answer{1}
 \begin{lstlisting}
 void mv(int m, int n, double M[m][n], double V[n], double W[m]){
-  par(0<=i<n){
+  par(0<=i<m){
     W[i] = 0.0;
-    for(int j = 0; i < n; j++){
-    	
+    for(int j = 0; j < n; j++){
       // summing into each cell in result vector 
       W[i] += M[i][j] * V[j];
     }
   }
 }
-
-using the CREW PRAM model
 \end{lstlisting}
+requires the CREW PRAM model
 \newpage
 \answer{2}
 \begin{lstlisting}
-void mv(int m, int n, double M[m][n], double V[n], double W[m]){
-  double C[m][n];
+void mv(int m, int n, double M[m][n], double V[n], double W[m]) {
+  
   par(0<=i<m, 0<=j<n){
-  	
-    // calculating summands in O(1)time
+    // doing actual multiplication in O(1) time steps (requires CREW PRAM)
     M[i][j] *= V[j];
-
-    
-    // summing in O(log(n)) time
+  }
+  
+  par(0<=i<m){
     int offset = 1;
     int betweenGap = 2;
+    // sum row [i] of Matrix in O(log(n)) time steps
     while(offset < n){
-      if(offset + j * betweenGap >= n){
-        noop;
-      }
-      else{
-        M[i][j * betweenGap] += M[i][offset + j * betweenGap]
+      // EREW summing, actually only n/betweenGap processors needed
+      par(0<=j<n) {
+        if(offset + j * betweenGap < n){
+          M[i][j * betweenGap] += M[i][offset + j * betweenGap];
+        }
       }
       offset *= 2;
-      betweenGap*=2;
+      betweenGap *= 2;
     }
-
-    // copying into result vector in O(1) time
+  }
+  
+  par(0<=i<n){
+    // copying into result vector in O(1) time steps
     W[i] = M[i][0];
   }
-
-using the CREW PRAM model
-
+}
 \end{lstlisting}
+requires the CREW PRAM model
 \newpage
 \answer{3}
 \begin{lstlisting}
 void mv(int m, int n, double M[m][n], double V[n], double W[m]){
   double C[m][n];
-  par(0<=i<m, 0<=j<n){
-  	
-    // copying vector in O(log(n)) time
+  par(0<=j<n){
+    // copying vector into intermediate matrix in O(1) time steps
     C[0][j] = V[j];
-    range = 2;
-    offset = 1;
-    while(offset < m){
-      if(i + offset >= range && i + offset >= m){
-        noop;
-      }
-      else{
-        C[i + offset][j] = C[i][j];
-        offset *= 2;
-        range *= 2;
-      }
-    }
-		
-    // calculating summands in O(1)time
-    M[i][j] = M[i][j] * C[i][j];
-
-    
-    // summing in O(log(n)) time
-    int offset = 1;
-    int betweenGap = 2;
-    while(offset < n){
-      if(offset + j * betweenGap >= n){
-        noop;
-      }
-      else{
-        M[i][j * betweenGap] += M[i][offset + j * betweenGap]
-      }
-      offset *= 2;
-      betweenGap*=2;
-    }
-
-    // copying into result vector in O(1) time
-    W[i] = M[i][0];
   }
 
-using the EREW PRAM model	
+  // making m copies of V in O(log(n)) time steps
+  offset = 1;
+  // O(log(n)) loops
+  while(offset < m){
+    // duplicating existing vectors in O(1)
+    par(0<=i<m){
+      if(i + offset < m){
+        par(0<=j<n){
+          C[i + offset][j] = C[i][j]
+        }
+      }
+    }
+    offset *= 2;
+  }
+
+  par(0<=i<m, 0<=j<n){
+    // calculating summands in O(1) time steps
+    M[i][j] = M[i][j] * C[i][j];
+  }
+    
+  par(0<=i<m){
+    int offset = 1;
+    int betweenGap = 2;
+    // sum row [i] of Matrix in O(log(n)) time steps
+    while(offset < n){
+      // EREW summing, actually only n/betweenGap processors needed
+      par(0<=j<n) {
+        if(offset + j * betweenGap < n){
+          M[i][j * betweenGap] += M[i][offset + j * betweenGap];
+        }
+      }
+      offset *= 2;
+      betweenGap *= 2;
+    }
+  }
+
+  par(0<=i<n){
+    // copying into result vector in O(1) time steps
+    W[i] = M[i][0];
+  }
+}
 \end{lstlisting}
+requires the EREW PRAM model
 
 \exercise{2}
 
@@ -203,10 +209,10 @@ for (i=0; i<n; i++) a[i] = b[i];
 \end{lstlisting}
 
 \answer{1}
-The program sorts a given arra of integers in ascending order. A comparison with "$a \leq \ $b" has to be done in some range, if the method is also supposed to work with arrays holding duplicates. If this is not done, all duplicates will end up on the same position, causing ''gaps'' (array position will have standard initialization like 0 or null) in the result. If "$a \leq \ $b" is used in the place where it is in the current code, it will guarantee stability. This means that the order of equal elements in the input will be sustained in the output.
+The program sorts a given array of integers in ascending order. A comparison with "$a \leq \ $b" has to be done in some range, if the method is also supposed to work with arrays holding duplicates. If this is not done, all duplicates will end up on the same position, causing ''gaps'' (array position will have standard initialization like 0 or null) in the result. If "$a \leq \ $b" is used in the place where it is in the current code, it will guarantee stability. This means that the order of equal elements in the input will be sustained in the output.
 
 \answer{2}
-The asymptotic sequential work of the given algorithm is O(n$^{2}$). The outer loop is executed n times. Within this loop, there are tow nested loops which both are executed O(n) times. Outside the outer loop, there is another loop which is executed n times. Every operation in- and outside the loops does have constant work. This concludes to the work of O(n$^{2}$). Here is the code once again, with explanation regarding work in the comments:
+The asymptotic sequential work of the given algorithm is O(n$^{2}$). The outer loop is executed n times. Within this loop, there are two nested loops which have a total of n-1 (= O(n)) iterations. Outside the outer loop, there is another loop which is executed n times. Every operation in- and outside the loops does have constant work. This concludes to the work of O(n$^{2}$). Here is the code once again, with explanation regarding work in the comments:
 
 \begin{lstlisting}
 for (i=0; i<n; i++) {            // canonical loop dependent on n
@@ -233,13 +239,12 @@ This is a very simplified calculation. The j-loop's workload rises as the i-loop
 \begin{lstlisting}
 #include <omp.h>
 ...
-a = (int*)malloc(n*sizeof(a*));
-#pragma omp parallel default(none)
-firstprivate(a){
+a = (int*)malloc(n*sizeof(int));
+b = (int*)malloc(n*sizeof(int));
+#pragma omp parallel default(none) shared(a, b)
+{
  int i;
- int block = n/omp_get_num_threads();
- int start = omp_get_thread_num()*block;
- int end = start+block;
+ #pragma omp for
   for (i=0; i<n; i++) {
    int count = 0;
    for (j=0; j<i; j++) {
@@ -253,9 +258,9 @@ firstprivate(a){
  }
 }
 // implicit barrier
-#pragma omp parallel default(none)
-b = (int*)malloc(n*sizeof(b*));
-firstprivate(b){
+int i;
+#pragma omp parallel for
+{
  for (i=0; i<n; i++) a[i] = b[i];
 }
 \end{lstlisting}
@@ -268,9 +273,9 @@ The outer loop is embarrassingly parallel, because the iterations are independen
 Relative speedup will be linear as long as $p \leq n$.\\
 
 \begin{math}SRel_{p}(n)=\frac{T_{par}(1,n)}{T_{par}(p,n)} = \frac{n^2}{n^2/p} = p \end{math}\\
-The absolute speedup has to be compared with the best known sequantial algorithm for this problem (sorting). Mergesort is on of these, running in \begin{math}O(n*log(n))\end{math}. The absulote speed-up is not linear.\\
+The absolute speedup has to be compared with the best known sequantial algorithm for this problem (sorting). Mergesort is on of these, running in \begin{math}O(n \cdot log(n))\end{math}. The absulote speed-up is not linear.\\
 
-\begin{math}S_{p}(n)=\frac{T_{seq}(n)}{T_{par}(p,n)} = \frac{n*log(n)}{n^2/p} = \frac{log(n)*p}{n} \end{math}\\
+\begin{math}S_{p}(n)=\frac{T_{seq}(n)}{T_{par}(p,n)} = \frac{n \cdot log(n)}{n^2/p} = \frac{log(n) \cdot p}{n} \end{math}\\
 
 
 
@@ -352,7 +357,7 @@ Total cache misses: 2n, \textbf{cache miss rate:} 1.0
 \exercise{5}
 
 \answer{1}
-A parallel section is opened, with to omp for constructs. In the first for-construct every element in \emph{A} is ranked in the array \emph{B} and inserted accordingly in \emph{C}. It is marked as no wait, as there are no data conflicts. In the second for-consrtuct every element in \emph{B} is ranked in the array \emph{A} and then inserted accordingly in \emph{C}. Ranking is done sequentially by binary search in O(log(n)), inserting into \emph{C} is done for n + m elements in parallel, in O(1) time. Therefore the runtime is O((n + m)/p * log(n)).
+A parallel section is opened, with to omp for constructs. In the first for-construct every element in \emph{A} is ranked in the array \emph{B} and inserted accordingly in \emph{C}. It is marked as no wait, as there are no data conflicts. In the second for-consrtuct every element in \emph{B} is ranked in the array \emph{A} and then inserted accordingly in \emph{C}. Ranking is done sequentially by binary search in O(log(n)), inserting into \emph{C} is done for n + m elements in parallel, in O(1) time. Therefore the runtime is $ O((n + m)/p \cdot log(n))$.
 
 
 \answer{2}
@@ -393,8 +398,8 @@ void merge_corank(double A[], int n, double B[], int m, double C[])
   
   for (i=0; i<t; i++) {
     merge(&A[coj[i]],coj[i+1]-coj[i],
-	  &B[cok[i]],cok[i+1]-cok[i],
-	  &C[i*(n+m)/t]);
+    &B[cok[i]],cok[i+1]-cok[i],
+    &C[i*(n+m)/t]);
   }
 }
 \end{lstlisting}

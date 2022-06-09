@@ -90,6 +90,7 @@ void divAndConquerMergeSizeBalanceSwap(double A[], long n, double B[], long m, d
             double* temp_arr = A;
             A = B;
             B = temp_arr;
+
             long temp_len = n;
             n = m;
             m = temp_len;
@@ -109,7 +110,6 @@ void merge(double A[], long n, double B[], long m, double C[]) {
     {
 #pragma omp master
         {
-            omp_set_nested(1);                                    // to allow parallel for in divAndConquerMerge
             long CUTOFF = (m + n) / (3 * omp_get_max_threads());  // each thread should perform approximately 3 seq merges
             // divAndConquerMergeSizeBalanceBranch(A, n, B, m, C, CUTOFF);
             divAndConquerMergeSizeBalanceSwap(A, n, B, m, C, CUTOFF);
@@ -117,7 +117,7 @@ void merge(double A[], long n, double B[], long m, double C[]) {
     }
 }
 /*
- ../bin/merge3_tester -n 100 -m 80 -p 4 -c
+ ./bin/merge3_tester -n 100 -m 80 -p 4 -c
  ./bin/merge3_tester -n 10000000 -m 20000000 -p 8 -c
  ./bin/merge3_tester -n 20000000 -m 10000 -p 8 -c
  ./bin/merge3_tester -n 10000 -m 20000000 -p 8 -c
