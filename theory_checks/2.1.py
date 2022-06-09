@@ -1,5 +1,7 @@
 import random
 
+random.seed(1)
+
 n = 20
 a = [random.randint(-10, 10) for _ in range(n)]
 b = [0] * n
