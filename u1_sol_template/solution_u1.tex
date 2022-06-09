@@ -113,11 +113,12 @@ void mv(int m, int n, double M[m][n], double V[n], double W[m]) {
     // doing actual multiplication in O(1) time steps (requires CREW PRAM)
     M[i][j] *= V[j];
   }
-  
+
+  // sum rows of Matrix in O(log(n)) time steps
   par(0<=i<m){
     int offset = 1;
     int betweenGap = 2;
-    // sum row [i] of Matrix in O(log(n)) time steps
+    // sum of Matrix[i] in O(log(n)) time steps
     while(offset < n){
       // EREW summing, actually only n/betweenGap processors needed
       par(0<=j<n) {
@@ -209,11 +210,13 @@ for (i=0; i<n; i++) a[i] = b[i];
 \end{lstlisting}
 
 \answer{1}
-The program sorts a given array of integers in ascending order. A comparison with "$a \leq \ $b" has to be done in some range, if the method is also supposed to work with arrays holding duplicates. If this is not done, all duplicates will end up on the same position, causing ''gaps'' (array position will have standard initialization like 0 or null) in the result. If "$a \leq \ $b" is used in the place where it is in the current code, it will guarantee stability. This means that the order of equal elements in the input will be sustained in the output.
+The program sorts a given array of integers in ascending order. A comparison with "$a \leq \ b$" has to be done in for all b that come before a, so that the program also sorts array with duplicates. If $<=$ is not used for all b that come before a, all duplicates will end up at the same index in the result, causing ``gaps'' (some array entries will have undefined/default initialization value). Using $<=$ also guarantees stability, meaning that the relative order of equal elements in the input will be sustained in the output.
 
 \answer{2}
-The asymptotic sequential work of the given algorithm is O(n$^{2}$). The outer loop is executed n times. Within this loop, there are two nested loops which have a total of n-1 (= O(n)) iterations. Outside the outer loop, there is another loop which is executed n times. Every operation in- and outside the loops does have constant work. This concludes to the work of O(n$^{2}$). Here is the code once again, with explanation regarding work in the comments:
+The asymptotic sequential work of the given algorithm is $O(n^{2})$. The outer loop is executed n times. Within this loop, there are two nested loops which have a total of $n-1 (= O(n))$ iterations (j run from 0 to i, and then from i + 1 to n), each with $O(1)$ work. After the first (outer) loop, there is another loop which is executed n times, with $O(1)$ work per iteration. This concludes to the work of $O(n^{2})$. Here is the code once again, with explanation regarding work in the comments:
 
+% TODO REVIEW dependent on i is not canonical though?
+% TODO REVIEW not necessary?
 \begin{lstlisting}
 for (i=0; i<n; i++) {            // canonical loop dependent on n
   int count = 0;                 // constant work
@@ -229,6 +232,8 @@ for (i=0; i<n; i++) {            // canonical loop dependent on n
 for (i=0; i<n; i++)              // canonical loop dependent on n
   a[i] = b[i];                   // constant work
 \end{lstlisting}
+
+% TODO REVIEW exact iterations?
 \begin{math}n*(1 + n*(1) + 1 + n*(1) + 1) + n*(1) =\end{math}\\
 \begin{math}n*(n + 3) + n =\end{math}\\
 \begin{math}n^2 + 4n\end{math}\\
@@ -238,35 +243,33 @@ This is a very simplified calculation. The j-loop's workload rises as the i-loop
 \answer{3}
 \begin{lstlisting}
 #include <omp.h>
-...
-a = (int*)malloc(n*sizeof(int));
-b = (int*)malloc(n*sizeof(int));
-#pragma omp parallel default(none) shared(a, b)
+// assume a, b initialized arrays, each with a capacity of n integers
+#pragma omp parallel default(none) shared(a, b) firstprivate(n)
 {
- int i;
- #pragma omp for
-  for (i=0; i<n; i++) {
+  int i;
+  #pragma omp for
+  for (i = 0; i < n; i++) {
    int count = 0;
-   for (j=0; j<i; j++) {
-     if (a[j]<=a[i]) count++;
+   int j;
+   for (j = 0; j < i; j++) {
+    if (a[j] <= a[i]) count++;
    }
-   j++;
-   for (; j<n; j++) {
-     if (a[j]<a[i]) count++;
+    j++;
+   for (; j < n; j++) {
+    if (a[j] < a[i]) count++;
    }
    b[count] = a[i];
+  }
+  // implicit barrier
+  #pragma omp for
+  for (i = 0; i < n; i++) {
+   a[i] = b[i];
  }
-}
-// implicit barrier
-int i;
-#pragma omp parallel for
-{
- for (i=0; i<n; i++) a[i] = b[i];
 }
 \end{lstlisting}
 
 \answer{4}
-The outer loop is embarrassingly parallel, because the iterations are independent of each other. Therefore, the speedup is linear (compared to the sequential execution of this algorithm). The runtime will be in:\\
+The outer loop is embarrassingly parallel, because the iterations are independent of each other. Therefore, the speedup is linear (compared to the sequential execution of this algorithm). So assuming $n \geq p$ the runtime will be in:\\
 \begin{math}O(\frac{n^2}{p})\end{math}\\
 
 \answer{5}
@@ -324,7 +327,7 @@ case / $t$             & $t[0]$ & $t[1]$ & $t[2]$ & $t[3]$ & $t[4]$ & $t[5]$ \\
 
 \answer{3}
 False sharing is a possible performance issue:
-Multiple threads (on different cores) may want to access t (at different indexes) at close points in time. If two indexes i, j are close enough and positioned in a way that t[i] and t[j] are on the same cache line, and t[i] t[j] are accessed by different threads, they will be ``falsely shared'' and cache coherency activity will occur, which impacts performance considerably. 
+Multiple threads (on different cores) may want to access t (at different indexes i and j) at close points in time. If two indexes i, j are close enough and positioned in a way that t[i] and t[j] are on the same cache line, and t[i] t[j] are accessed by different threads, they will be ``falsely shared'' and cache coherency activity will occur, which impacts performance considerably. 
 
 \exercise{4}
 
@@ -357,7 +360,7 @@ Total cache misses: 2n, \textbf{cache miss rate:} 1.0
 \exercise{5}
 
 \answer{1}
-A parallel section is opened, with to omp for constructs. In the first for-construct every element in \emph{A} is ranked in the array \emph{B} and inserted accordingly in \emph{C}. It is marked as no wait, as there are no data conflicts. In the second for-consrtuct every element in \emph{B} is ranked in the array \emph{A} and then inserted accordingly in \emph{C}. Ranking is done sequentially by binary search in O(log(n)), inserting into \emph{C} is done for n + m elements in parallel, in O(1) time. Therefore the runtime is $ O((n + m)/p \cdot log(n))$.
+A parallel section is opened, with to omp for constructs. In the first for-construct every element in \emph{A} is ranked in the array \emph{B} and inserted accordingly in \emph{C}. It is marked as no wait, as there are no data conflicts. In the second for-construct every element in \emph{B} is ranked in the array \emph{A} and then inserted accordingly in \emph{C}. Ranking is done sequentially by binary search in O(log(n)), inserting into \emph{C} is done for n + m elements in parallel, in O(1) time. Therefore the runtime is $ O((n + m)/p \cdot log(n))$.
 
 
 \answer{2}
