@@ -1,10 +1,3 @@
-/*
- * rmerge.c
- *
- *  Created on: May 12, 2022
- *      Author: Jakob
- */
-
 #include <omp.h>
 #include <stdio.h>
 #include <stdlib.h>

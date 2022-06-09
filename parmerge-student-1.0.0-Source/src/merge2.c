@@ -1,10 +1,3 @@
-/*
- * parmerge.h
- *
- *  Created on: May 12, 2022
- *      Author: Elias
- */
-
 #include <math.h>
 #include <omp.h>
 #include <stdio.h>
