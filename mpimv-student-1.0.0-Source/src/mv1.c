@@ -1,5 +1,3 @@
-
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -31,7 +29,7 @@ void mv(base_t **A, int nrows, int ncols, int nrows_a_loc, int ncols_a_loc,
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    MPI_DOUBLE[ncols_x_loc] sendbuf = x;
+    MPI_DOUBLE* sendbuf = &nrows_x_loc;
 
     /*
     int chonk = nrows/size;
@@ -51,8 +49,8 @@ void mv(base_t **A, int nrows, int ncols, int nrows_a_loc, int ncols_a_loc,
     */
 
     int[size] displs;
-    displs[rank] = ncols_x_loc;
-    MPI_Allgather(displs, 1, int, displs, 1, int, MPI_COMM_WORLD);
+    displs[rank] = nrows_x_loc;
+    MPI_Allgather(displs[rank], 1, int, displs, 1, int, MPI_COMM_WORLD);
 
     int[site] recvcounts;
     if (rank == size - 1)
@@ -63,13 +61,13 @@ void mv(base_t **A, int nrows, int ncols, int nrows_a_loc, int ncols_a_loc,
     {
         recvcounts[rank] = displs[rank + 1] - displs[rank];
     }
-    MPI_Allgather(recvcounts, 1, int, recvcounts, 1, int, MPI_COMM_WORLD);
+    MPI_Allgather(recvcounts[rank], 1, int, recvcounts, 1, int, MPI_COMM_WORLD);
 
     // error handling?
     MPI_Allgatherv(sendbuf, recvcounts[rank], MPI_DOUBLE,
                    x, recvcounts, displs, MPI_DOUBLE, MPI_COMM_WORLD);
 
-    for (int i = ncols_x_loc; i < recvcounts[rank]; i++)
+    for (int i = ncols_b_loc; i < recvcounts[rank]; i++)
     {
         b[i] = 0;
         for (int j = 0; j < ncols; i++)
