@@ -74,12 +74,12 @@ void divAndConquerMergeSizeBalanceBranch(double A[], long n, double B[], long m,
 void divAndConquerMergeSizeBalanceSwap(double A[], long n, double B[], long m, double C[], const long CUTOFF) {
     int i;
     if (n == 0) {
-#pragma omp parallel for
+#pragma omp taskloop
         for (i = 0; i < m; i++) {
             C[i] = B[i];
         }
     } else if (m == 0) {
-#pragma omp parallel for
+#pragma omp taskloop
         for (i = 0; i < n; i++) {
             C[i] = A[i];
         }
@@ -98,9 +98,9 @@ void divAndConquerMergeSizeBalanceSwap(double A[], long n, double B[], long m, d
         int r = n >> 1;
         int s = rank(A[r], B, m);
         C[r + s] = A[r];
-#pragma omp task shared(A, B, C)
+#pragma omp task default(none) shared(A, B, C) firstprivate(r, s)
         { divAndConquerMergeSizeBalanceSwap(A, r, B, s, C, CUTOFF); }
-#pragma omp task shared(A, B, C)
+#pragma omp task default(none) shared(A, B, C) firstprivate(r, s, m, n)
         { divAndConquerMergeSizeBalanceSwap(&A[r + 1], n - r - 1, &B[s], m - s, &C[r + s + 1], CUTOFF); }
     }
 }
@@ -110,10 +110,9 @@ void merge(double A[], long n, double B[], long m, double C[]) {
     {
 #pragma omp master
         {
-            omp_set_nested(1);
             long CUTOFF = (m + n) / (3 * omp_get_num_threads());  // each thread should perform approximately 3 seq merges
-            divAndConquerMergeSizeBalanceBranch(A, n, B, m, C, CUTOFF);
-            // divAndConquerMergeSizeBalanceSwap(A, n, B, m, C, CUTOFF);
+            // divAndConquerMergeSizeBalanceBranch(A, n, B, m, C, CUTOFF);
+            divAndConquerMergeSizeBalanceSwap(A, n, B, m, C, CUTOFF);
         }
     }
 }
