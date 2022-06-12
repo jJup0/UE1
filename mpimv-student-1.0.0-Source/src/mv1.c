@@ -29,50 +29,37 @@ void mv(base_t **A, int nrows, int ncols, int nrows_a_loc, int ncols_a_loc,
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    MPI_DOUBLE* sendbuf = &nrows_x_loc;
+    base_t* sendbuf = x;
+    base_t* completeX;
+    alloc_vector(&completeX, nrows);
 
-    /*
-    int chonk = nrows/size;
-    if (rank == size-1){
-        chonk += nrows % size;
-    }
+    int recvcounts[size];
+    recvcounts[rank] = nrows_x_loc;
+    
+    MPI_Allgather(&recvcounts[rank], 1, MPI_INT, recvcounts, 1, MPI_INT, MPI_COMM_WORLD);
+    printf("recvcnt of pro %d is %d\n", rank, recvcounts[rank]);
+    fflush(stdout);
 
-    int[size] recvcounts;
-    for(int i = 0; i < size; i++){
-        recvcounts[i] = chonk;
-    }
+    int displs[size];
+    displs[0] = 0;
+    MPI_Exscan(&nrows_x_loc, &displs[rank], 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    
+    printf("displs of pro %d is %d\n", rank, displs[rank]);
+    fflush(stdout);
 
-    int[size] displs;
-    for(int i = 0; i < size; i++){
-        displs[i] = i * chonk;
-    }
-    */
-
-    int[size] displs;
-    displs[rank] = nrows_x_loc;
-    MPI_Allgather(displs[rank], 1, int, displs, 1, int, MPI_COMM_WORLD);
-
-    int[site] recvcounts;
-    if (rank == size - 1)
-    {
-        recvcounts[rank] = ncols - displs[rank];
-    }
-    else
-    {
-        recvcounts[rank] = displs[rank + 1] - displs[rank];
-    }
-    MPI_Allgather(recvcounts[rank], 1, int, recvcounts, 1, int, MPI_COMM_WORLD);
+    MPI_Allgather(&displs[rank], 1, MPI_INT, displs, 1, MPI_INT, MPI_COMM_WORLD);
 
     // error handling?
     MPI_Allgatherv(sendbuf, recvcounts[rank], MPI_DOUBLE,
-                   x, recvcounts, displs, MPI_DOUBLE, MPI_COMM_WORLD);
+                   completeX, recvcounts, displs, MPI_DOUBLE, MPI_COMM_WORLD);
 
-    for (int i = ncols_b_loc; i < recvcounts[rank]; i++)
+    for (int i = 0; i < ncols_b_loc; i++)
     {
         b[i] = 0;
-        for (int j = 0; j < ncols; i++)
+        for (int j = 0; j < ncols; j++)
         {
-            b[i] += A[i][j] * x[j];
+            b[i] += A[i][j] * completeX[j];
         }
     }
+    
 }
