@@ -12,7 +12,7 @@ NLIST=(300 600 1200 12000)
 NREP=20
 
 TEST="mv1"
-TEST="mv2"
+# TEST="mv2"
 
 BINARY="../bin/${TEST}"
 
