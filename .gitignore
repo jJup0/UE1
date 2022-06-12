@@ -14,3 +14,4 @@ exercisesandprojects.pdf
 /testing/
 /build/
 *.Rhistory
+*slurm-*.out

@@ -11,8 +11,8 @@ PPN=(1 16 32)
 NLIST=(300 600 1200 12000)
 NREP=20
 
-TEST="mv1"
-# TEST="mv2"
+# TEST="mv1"
+TEST="mv2"
 
 #### my stuff ####
 # PPN=(1)
