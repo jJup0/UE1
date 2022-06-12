@@ -64,7 +64,8 @@ get_speed_up = function(results_matrix, seq_times) {
 
 make_graph = function(results_matrix,
                       seq_times,
-                      title) {
+                      title, 
+                      saveFileBool) {
   for (ns_idx in 1:length(ns)) {
     
     speed_up = get_speed_up(results_matrix, seq_times)
@@ -81,6 +82,9 @@ make_graph = function(results_matrix,
     
     scale_coeff = max(data_for_graph["abs_speed_up"])/max(data_for_graph["avgtime"])
     
+    # print(limits=data_for_graph["processors"])
+    # break
+     
     plot_to_draw = ggplot(data_for_graph, aes(x = processors)) +
       
       geom_line(aes(y = avgtime), size = 2, color = time_color) +
@@ -97,7 +101,7 @@ make_graph = function(results_matrix,
         sec.axis = sec_axis( ~ . * scale_coeff, name = "Absolute Speed Up")
       ) +
       
-      scale_x_discrete(name = "Processors") +
+      scale_x_discrete(name = "Processors", limits=ps) +
       
       
       theme(
@@ -113,7 +117,9 @@ make_graph = function(results_matrix,
         format(ms[ns_idx], big.mark = ",", scientific = FALSE)
       ))
     print(plot_to_draw)
-    ggsave(sprintf("./merge_plot_%s_%d_%d.png", gsub(" ", "-", title), ns[ns_idx], ms[ns_idx]))
+    if (saveFileBool) {
+      ggsave(sprintf("./merge_plot_%s_%d_%d.png", gsub(" ", "-", title), ns[ns_idx], ms[ns_idx]))  
+    }
   }
 }
 
@@ -133,12 +139,12 @@ merge_names = c("merge1", "merge2", "merge3")
 merge_paths = c(
   "merge1/run_05-23-22[18_58_01]",
   "merge2/run_18_12_17",
-  "merge3/run_06-09-22[14_45_44]_SWAP"
+  "merge3/run_06-11-22[15_31_25]_SWAP_TASKLOOP"
 )
 
 for (i in 1:length(merge_names)) {
   results = get_results(merge_paths[i], merge_names[i])
-  make_graph(results, seq_times, titles[i])
+  make_graph(results, seq_times, titles[i], 0)
 }
 
 get_speed_up(get_results(merge_paths[1], merge_names[1]), seq_times)
