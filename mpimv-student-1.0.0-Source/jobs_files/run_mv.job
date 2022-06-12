@@ -14,7 +14,24 @@ NREP=20
 TEST="mv1"
 # TEST="mv2"
 
-BINARY="../bin/${TEST}"
+#### my stuff ####
+# PPN=(1)
+# NLIST=(100)
+# NREP=3
+
+# TAGNAME="_SWAP_TASKLOOP"
+TAGNAME=""
+
+NOW=$(date +"%D[%T]")
+NOW=${NOW//":"/"_"}
+NOW=${NOW//"/"/"-"}
+
+SOURCE_ROOT="$HOME/UE1/mpimv-student-1.0.0-Source"
+OUT_FOLDER="${SOURCE_ROOT}/job_outputs/${TEST}/run_${NOW}${TAGNAME}/"
+$(mkdir ${OUT_FOLDER})
+#### end my stuff #### 
+
+BINARY="${SOURCE_ROOT}/bin/${TEST}"
 
 nlen=${#NLIST[@]}
 plen=${#PPN[@]}
@@ -25,7 +42,10 @@ do
    for (( j=0; j<${plen}; j++ ));
    do
       ppn=${PPN[$j]}
-      srun --ntasks-per-node=$ppn ${BINARY} -n $n -r ${NREP} > "output_${TEST}_${ppn}_${n}.out"
+      srun --ntasks-per-node=$ppn ${BINARY} -n $n -r ${NREP} > "${OUT_FOLDER}output_${TEST}_${ppn}_${n}.out"
    done
-   srun -N 1 --ntasks-per-node=1 ${BINARY} -n $n -r ${NREP} > "output_${TEST}_seq_${n}.out"
+   srun -N 1 --ntasks-per-node=1 ${BINARY} -n $n -r ${NREP} > "${OUT_FOLDER}output_${TEST}_seq_${n}.out"
 done
+
+# cd ~/UE1/mpimv-student-1.0.0-Source/jobs_files; sbatch run_mv.job; cd ..
+# cd ~/UE1/mpimv-student-1.0.0-Source; module load mpi/openmpiS; cmake .; make
