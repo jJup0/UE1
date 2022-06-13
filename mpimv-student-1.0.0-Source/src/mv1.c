@@ -36,6 +36,10 @@ void printDoubleArray(double *array, int n, int rank) {
  b: pointer to the parts of the result vector the process writes on
  nrows_b_loc: how many entries of b the process writes on
 */
+
+/*
+(n*m/p) + m + p
+*/
 void mv(base_t **A, int nrows, int ncols, int nrows_a_loc, int ncols_a_loc, base_t *x, int nrows_x_loc, base_t *b, int ncols_b_loc) {
     int rank, size;
     MPI_Comm_size(MPI_COMM_WORLD, &size);
@@ -48,15 +52,19 @@ void mv(base_t **A, int nrows, int ncols, int nrows_a_loc, int ncols_a_loc, base
 
     int displs[size];
     displs[0] = 0;
+    // p + log(p)
     MPI_Exscan(&nrows_x_loc, &displs[rank], 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
+    // p + log(p)
     MPI_Allgather(&nrows_x_loc, 1, MPI_INT, recvcounts, 1, MPI_INT, MPI_COMM_WORLD);
 
+    // p + log(p)
     MPI_Allgather(&displs[rank], 1, MPI_INT, displs, 1, MPI_INT, MPI_COMM_WORLD);
 
-    // error handling?
+    // m + log(p)
     MPI_Allgatherv(x, nrows_x_loc, MPI_DOUBLE, completeX, recvcounts, displs, MPI_DOUBLE, MPI_COMM_WORLD);
 
+    // m*n/p
     for (int i = 0; i < ncols_b_loc; i++) {
         b[i] = 0;
         for (int j = 0; j < ncols; j++) {
