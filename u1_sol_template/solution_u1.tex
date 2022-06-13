@@ -220,7 +220,7 @@ The asymptotic sequential work of the given algorithm is $O(n^{2})$. The outer l
 \begin{lstlisting}
 for (i=0; i<n; i++) {            // canonical loop dependent on n
   int count = 0;                 // constant work
-  for (j=0; j<i; j++) {          // canonical loop dependent on i
+  for (j=0; j<i; j++) {          // linear loop dependent on i
     if (a[j]<=a[i]) count++;     // constant work
   }
   j++;                           // constant work
@@ -232,11 +232,8 @@ for (i=0; i<n; i++) {            // canonical loop dependent on n
 for (i=0; i<n; i++)              // canonical loop dependent on n
   a[i] = b[i];                   // constant work
 \end{lstlisting}
-
-% TODO REVIEW exact iterations?
-\begin{math}n*(1 + n*(1) + 1 + n*(1) + 1) + n*(1) =\end{math}\\
-\begin{math}n*(n + 3) + n =\end{math}\\
-\begin{math}n^2 + 4n\end{math}\\
+\noindent
+\begin{math}n \cdot (1 + n \cdot 1 + 1 + n \cdot 1 + 1) + n \cdot 1 = n \cdot (n + 3) + n = n^2 + 4n\end{math}\\
 \begin{math}n^2 + 4n \in O(n^2)\end{math}\\
 This is a very simplified calculation. The j-loop's workload rises as the i-loop's workload shrinks. Generally, within one outer-loop iteration, the sum of the iterations of the first and second j-loop together is n. However, it does not make in difference for the big O notation.
 
@@ -459,7 +456,6 @@ Testing empirically showed that a very good cut-off value can be calculated with
 where n and m are the lengths of the arrays A and B before performing any recursion steps
 
 \answer{3}
-
 \exercise{8}
 
 \answer{1}
@@ -470,7 +466,9 @@ The best known sequential algorithm vor matrix-vector multiplication runs in $O(
 \begin{math}S_{p}(n)=\frac{T_{seq}(n)}{T_{par}(p,n)} = \frac{m \cdot n}{(m \cdot n)/p } = p \end{math} (if $p \leq\ n$)\\
 In worst case, the speedup is not linear anymore:\\
 \begin{math}S_{p}(n)=\frac{T_{seq}(n)}{T_{par}(p,n)} = \frac{m \cdot n}{m \cdot n/p + m + p} = \frac{m \cdot n \cdot p}{m \cdot n + p \cdot  m + p^2} = \frac{p}{1 + p/n + p^2/(m \cdot n)} = \frac{n \cdot p}{n + p + p^2/m}\end{math}\\
-In not too many processes are used (as stated above), then the parallel efficiency would be 1. If too many $p$ will be used, the errifiency will turn into:\\
+In not too many processes are used (as stated above), then the parallel efficiency would be 1:\\
+\begin{math}E_{p}(n)=\frac{T_{seq}(n)}{pT_{par}(p,n)} = \frac{m \cdot n}{p \cdot (m \cdot n)/p} = 1 \end{math}\\
+If too many $p$ will be used, the errifiency will turn into:\\
 \begin{math}E_{p}(n)=\frac{T_{seq}(n)}{pT_{par}(p,n)} = \frac{1}{1 + p/n + p^2/(m \cdot n)} \end{math}\\
 As we can see, the efficiency will drop further the more we increase $p$.
 \answer{3}
@@ -487,7 +485,9 @@ We would expect the algorithm to have a linear relaitive speedup, due to a good 
 \begin{math}S_{p}(n)=\frac{T_{seq}(n)}{T_{par}(p,n)} = \frac{m \cdot n}{(m \cdot n)/p } = p \end{math} (if $p \leq\ m$)\\
 In worst case, the speedup is not linear anymore:\\
 \begin{math}S_{p}(n)=\frac{T_{seq}(n)}{T_{par}(p,n)} = \frac{m \cdot n}{m \cdot n/p + n + p} = \frac{m \cdot n \cdot p}{m \cdot n + p \cdot  n + p^2} = \frac{p}{1 + p/m + p^2/(m \cdot n)} = \frac{m \cdot p}{m + p + p^2/n}\end{math}\\
-In not too many processes are used (as stated above), then the parallel efficiency would be 1. If too many $p$ will be used, the errifiency will turn into:\\
+In not too many processes are used (as stated above), then the parallel efficiency would be 1:\\
+\begin{math}E_{p}(n)=\frac{T_{seq}(n)}{pT_{par}(p,n)} = \frac{m \cdot n}{p \cdot (m \cdot n)/p} = 1 \end{math}\\
+If too many $p$ will be used, the errifiency will turn into:\\
 \begin{math}E_{p}(n)=\frac{T_{seq}(n)}{pT_{par}(p,n)} = \frac{1}{1 + p/n + p^2/(m \cdot n)} \end{math}\\
 As we can see, the efficiency will drop further the more we increase $p$.
 \answer{3}
