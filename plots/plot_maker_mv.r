@@ -9,7 +9,8 @@ library(hrbrthemes)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 get_results_mv = function(local_path, alg_str, ps) {
-  results = array(rep(NaN, length(ns) * 1 * 2), c(length(ns), 1, 2), dimnames = list(
+  
+  results = array(rep(NaN, length(ns) * length(ps) * 2), c(length(ns), length(ps), 2), dimnames = list(
     c("n=300", "n=600", "n=1200", "n=12000"),
     c(),
     c("processors", "avg_time")
@@ -31,13 +32,10 @@ get_results_mv = function(local_path, alg_str, ps) {
       trial_results = read.csv(trial_file_path)
       
       processors = trial_results[1, "p"]
-      if (processors != 8*p_count && alg_str != "seq") {
-        stop(sprintf("p_count != processors: %d != %d", p_count, processors))
-      }
       avg_time = mean(trial_results[, "t"])
       
-      results[ns_idx, p_count, 1] = processors
-      results[ns_idx, p_count, 2] = avg_time
+      results[ns_idx, p_idx, 1] = processors
+      results[ns_idx, p_idx, 2] = avg_time
     }
   }
   results =
@@ -53,7 +51,7 @@ get_seq_times_mv = function(local_path, algname, ps) {
   for (i in 1:length(ns)) {
     seq_times[i] = mean(seq_times_matrix[i, , 2])
   }
-  names(seq_times) = c("n=10^6", "n=10^7", "n=10^8")
+  names(seq_times) = c("n=300", "n=600", "n=1200", "n=12000")
   return(seq_times)
 }
 
@@ -84,8 +82,6 @@ make_graph = function(results_matrix,
     
     scale_coeff = 1.1 * max(data_for_graph["abs_speed_up"]) / max(data_for_graph["avgtime"])
     
-    print(data_for_graph["abs_speed_up"])
-    
     plot_to_draw = ggplot(data_for_graph, aes(x = processors)) +
       
       geom_line(aes(y = avgtime), size = 2, color = time_color) +
@@ -103,7 +99,7 @@ make_graph = function(results_matrix,
       ) +
       
       # scale_x_continuous(name = "Processors", breaks=ps) +
-      scale_x_discrete(name = "Processors", limits = ps) +
+      scale_x_discrete(name = "Processors", limits = ps * 8) +
       
       
       theme(
@@ -113,18 +109,16 @@ make_graph = function(results_matrix,
       ) +
       
       ggtitle(sprintf(
-        "%s: n = %s, m = %s",
+        "%s: n = %s",
         title,
-        format(ns[ns_idx], big.mark = ",", scientific = FALSE),
-        format(ms[ns_idx], big.mark = ",", scientific = FALSE)
+        format(ns[ns_idx], big.mark = ",", scientific = FALSE)
       ))
     print(plot_to_draw)
     if (saveFileBool) {
       ggsave(sprintf(
-        "./merge_plot_%s_%d_%d.png",
+        "./merge_plot_%s_%d.png",
         gsub(" ", "-", title),
-        ns[ns_idx],
-        ms[ns_idx]
+        ns[ns_idx]
       ))
     }
   }
@@ -150,13 +144,12 @@ mv_names = c("mv1",
 mv_paths = c("mv1/run_06-13-22[14_08_37]",
              "mv2/run_06-13-22[14_08_44]")
 
+
 make_graph(get_results_mv(mv_paths[1], mv_names[1], ps),
            mv1_seq_times,
            titles[1],
-           0)
+           1)
 make_graph(get_results_mv(mv_paths[2], mv_names[2], ps),
            mv2_seq_times,
            titles[2],
-           0)
-
-# get_speed_up(get_results(merge_paths[1], merge_names[1]), seq_times)
+           1)
