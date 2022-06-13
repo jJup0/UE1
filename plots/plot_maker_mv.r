@@ -1,51 +1,54 @@
-# install.packages("hrbrthemes")
 library(ggplot2)
 library(dplyr)
 library(patchwork) # To display 2 charts together
 library(hrbrthemes)
 
 
-get_results_merge = function(local_path, alg_str) {
-  results = array(rep(NaN, 3 * length(ps) * 2), c(3, length(ps), 2), dimnames = list(
-    c("n=10^6", "n=10^7", "n=10^8"),
+
+
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+
+get_results_mv = function(local_path, alg_str, ps) {
+  results = array(rep(NaN, length(ns) * 1 * 2), c(length(ns), 1, 2), dimnames = list(
+    c("n=300", "n=600", "n=1200", "n=12000"),
     c(),
     c("processors", "avg_time")
   ))
   
   for (ns_idx in 1:length(ns)) {
     n = ns[ns_idx]
-    m = ms[ns_idx]
+    
     for (p_idx in 1:length(ps)) {
       p_count = ps[p_idx]
-      
       trial_file_path = sprintf(
-        "%s/output_%s_%d_%d_%d.out",
+        "%s/output_%s_%d_%d.out",
         paste(job_outputs_path, local_path, sep = "/"),
         alg_str,
         n,
-        m,
         p_count
       )
       
       trial_results = read.csv(trial_file_path)
+      
       processors = trial_results[1, "p"]
-      if (processors != p_count && alg_str != "seq") {
+      if (processors != 8*p_count && alg_str != "seq") {
         stop(sprintf("p_count != processors: %d != %d", p_count, processors))
       }
-      avg_time = mean(trial_results[, "time"])
+      avg_time = mean(trial_results[, "t"])
       
-      results[ns_idx, p_idx, 1] = processors
-      results[ns_idx, p_idx, 2] = avg_time
+      results[ns_idx, p_count, 1] = processors
+      results[ns_idx, p_count, 2] = avg_time
     }
   }
-  results <-
+  results =
     provideDimnames(results ,
                     sep = "_",
                     base = list('input_size', 'p_count', 'x_y_point'))
 }
 
-get_seq_times_merge = function(local_path) {
-  seq_times_matrix = get_results_merge(local_path, "seq")
+
+get_seq_times_mv = function(local_path, algname, ps) {
+  seq_times_matrix = get_results_mv(local_path, algname, ps)
   seq_times = vector(length = 3)
   for (i in 1:length(ns)) {
     seq_times[i] = mean(seq_times_matrix[i, , 2])
@@ -54,8 +57,9 @@ get_seq_times_merge = function(local_path) {
   return(seq_times)
 }
 
+
 get_speed_up = function(results_matrix, seq_times) {
-  speed_up = results_matrix[, ,]
+  speed_up = results_matrix[, , ]
   for (i in 1:length(ns)) {
     speed_up[i, , 2] = rep(seq_times[i], length(speed_up[i, , 2])) / speed_up[i, , 2]
   }
@@ -95,7 +99,7 @@ make_graph = function(results_matrix,
         limits = c(0, max(data_for_graph["avgtime"])),
         
         # Add a second axis and specify its features
-        sec.axis = sec_axis( ~ . * scale_coeff, name = "Absolute Speed Up")
+        sec.axis = sec_axis(~ . * scale_coeff, name = "Absolute Speed Up")
       ) +
       
       # scale_x_continuous(name = "Processors", breaks=ps) +
@@ -129,30 +133,30 @@ make_graph = function(results_matrix,
 
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
-job_outputs_path = "../parmerge-student-1.0.0-Source/job_outputs"
+job_outputs_path = "../mpimv-student-1.0.0-Source/job_outputs"
 
-ps_c = c("2", "4", "8", "16", "32", "64")
-ns = c(10 ^ 6, 10 ^ 7, 10 ^ 8)
-ms = c(2 * 10 ^ 6, 2 * 10 ^ 7, 2 * 10 ^ 8)
-ps = c(2, 4, 8, 11, 16, 32)
+ns = c(300, 600, 1200, 12000)
+ps = c(1, 16, 32)
 
-seq_times = get_seq_times_merge("seq/run_05-23-22[16_52_55]")
+mv1_seq_times = get_seq_times_mv("mvseq/mv1_run_06-13-22[14_08_37]", "mv1_seq", c(1))
+mv2_seq_times = get_seq_times_mv("mvseq/mv2_run_06-13-22[14_08_44]", "mv2_seq", c(1))
 
-titles = c("Rank each element",
-           "Co-rank",
-           "Divide and Conquer")
+titles = c("MPI_Allgatherv",
+           "MPI_Reduce_scatter")
 
-merge_names = c("merge1",
-                "merge2",
-                "merge3")
+mv_names = c("mv1",
+             "mv2")
 
-merge_paths = c(
-  "merge1/run_05-23-22[18_58_01]",
-  "merge2/run_18_12_17",
-  "merge3/run_06-11-22[15_31_25]_SWAP_TASKLOOP"
-)
+mv_paths = c("mv1/run_06-13-22[14_08_37]",
+             "mv2/run_06-13-22[14_08_44]")
 
-for (i in 1:length(merge_names)) {
-  results = get_results_merge(merge_paths[i], merge_names[i])
-  make_graph(results, seq_times, titles[i], 1)
-}
+make_graph(get_results_mv(mv_paths[1], mv_names[1], ps),
+           mv1_seq_times,
+           titles[1],
+           0)
+make_graph(get_results_mv(mv_paths[2], mv_names[2], ps),
+           mv2_seq_times,
+           titles[2],
+           0)
+
+# get_speed_up(get_results(merge_paths[1], merge_names[1]), seq_times)
