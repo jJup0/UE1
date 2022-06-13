@@ -110,7 +110,7 @@ void merge(double A[], long n, double B[], long m, double C[]) {
     {
 #pragma omp master
         {
-            long CUTOFF = (m + n) / (3 * omp_get_num_threads());  // each thread should perform approximately 3 seq merges
+            long CUTOFF = (m + n) / (omp_get_num_threads());  // each thread should perform approximately 3 seq merges
             // divAndConquerMergeSizeBalanceBranch(A, n, B, m, C, CUTOFF);
             divAndConquerMergeSizeBalanceSwap(A, n, B, m, C, CUTOFF);
         }

@@ -46,11 +46,11 @@ void mv(base_t **A, int nrows, int ncols, int nrows_a_loc, int ncols_a_loc, base
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     base_t *completeX;
+    base_t *recvcounts;
+    base_t *displs;
     alloc_vector(&completeX, nrows);
-
-    int recvcounts[size];
-
-    int displs[size];
+    alloc_vector(&recvcounts, size);
+    alloc_vector(&displs, size);
     displs[0] = 0;
     // p + log(p)
     MPI_Exscan(&nrows_x_loc, &displs[rank], 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
@@ -72,4 +72,6 @@ void mv(base_t **A, int nrows, int ncols, int nrows_a_loc, int ncols_a_loc, base
         }
     }
     free_vector(completeX);
+    free_vector(recvcounts);
+    free_vector(displs);
 }
