@@ -468,15 +468,30 @@ where n and m are the lengths of the arrays A and B before performing any recurs
 \answer{1}
 
 \answer{2}
-
+We would expect the algorithm to have a linear relaitive speedup, due to a good load balance on the processes - as long as $p \leq\ n$  (rows of the matrix $A$). Generating the sub-input is manageable in $O(\frac{m \cdot n}{p})$ The complexity of the multiplication one process has to calculate is in $\frac{m \cdot n}{p}$. The complexities of all MPI-functions must be added. MPI\_Allgather,  MPI\_Allgatherv and MPI\_Exscan run in $O(n + log(p))$. As for Allgatherv, the input size is dependent on m (number of columns in matrix $A$), so $(m + log(p))$ has to be added. As for the other calls, the input size is dependent on $p$, so $(p + log(p))$ has to be added as well. After simplification, the complexity should be $O(\frac{m \cdot n}{p} + m + p)$.\\
+The best known sequential algorithm vor matrix-vector multiplication runs in $O(m \cdot n)$. However, if we do not use more processes than input lines $n$, both $m$ and $p$ will be dominated by $\frac{m \cdot n}{p}$.\\
+\begin{math}S_{p}(n)=\frac{T_{seq}(n)}{T_{par}(p,n)} = \frac{m \cdot n}{(m \cdot n)/p } = p \end{math} (if $p \leq\ n$)\\
+In worst case, the speedup is not linear anymore:\\
+\begin{math}S_{p}(n)=\frac{T_{seq}(n)}{T_{par}(p,n)} = \frac{m \cdot n}{m \cdot n/p + m + p} = \frac{m \cdot n \cdot p}{m \cdot n + p \cdot  m + p^2} = \frac{p}{1 + p/n + p^2/(m \cdot n)} = \frac{n \cdot p}{n + p + p^2/m}\end{math}\\
+In not too many processes are used (as stated above), then the parallel efficiency would be 1. If too many $p$ will be used, the errifiency will turn into:\\
+\begin{math}E_{p}(n)=\frac{T_{seq}(n)}{pT_{par}(p,n)} = \frac{1}{1 + p/n + p^2/(m \cdot n)} \end{math}\\
+As we can see, the efficiency will drop further the more we increase $p$.
 \answer{3}
+insert plots here
 
 \exercise{9}
 
 \answer{1}
 
 \answer{2}
-
+We would expect the algorithm to have a linear relaitive speedup, due to a good load balance on the processes - as long as $p \leq\ m$  (columns of the matrix $A$). Generating the sub-input is manageable in $O(\frac{m \cdot n}{p})$. The complexity of the multiplication one process has to calculate is in $\frac{m \cdot n}{p}$. The complexities of all MPI-functions must be added. MPI\_Allgather,  MPI\_Reduce\_scatter run in $O(n + log(p))$. As for Reduce\_scatter, the input size is dependent on n (number of rows in matrix $A$), so $(n + log(p))$ has to be added. As for Allgather, the input size is dependent on $p$, so $(p + log(p))$ has to be added as well. After simplification, the complexity should be $O(\frac{m \cdot n}{p} + n + p)$.\\
+The best known sequential algorithm vor matrix-vector multiplication runs in $O(m \cdot n)$. However, if we do not use more processes than input lines $n$, both $m$ and $p$ will be dominated by $\frac{m \cdot n}{p}$.\\
+\begin{math}S_{p}(n)=\frac{T_{seq}(n)}{T_{par}(p,n)} = \frac{m \cdot n}{(m \cdot n)/p } = p \end{math} (if $p \leq\ m$)\\
+In worst case, the speedup is not linear anymore:\\
+\begin{math}S_{p}(n)=\frac{T_{seq}(n)}{T_{par}(p,n)} = \frac{m \cdot n}{m \cdot n/p + n + p} = \frac{m \cdot n \cdot p}{m \cdot n + p \cdot  n + p^2} = \frac{p}{1 + p/m + p^2/(m \cdot n)} = \frac{m \cdot p}{m + p + p^2/n}\end{math}\\
+In not too many processes are used (as stated above), then the parallel efficiency would be 1. If too many $p$ will be used, the errifiency will turn into:\\
+\begin{math}E_{p}(n)=\frac{T_{seq}(n)}{pT_{par}(p,n)} = \frac{1}{1 + p/n + p^2/(m \cdot n)} \end{math}\\
+As we can see, the efficiency will drop further the more we increase $p$.
 \answer{3}
 
 
