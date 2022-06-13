@@ -408,12 +408,29 @@ void merge_corank(double A[], int n, double B[], int m, double C[])
 \end{lstlisting}
 
 \answer{1}
-
+The asymptotic complexity can be calculated as follows:\\
+\\
+$O(t * log(n+m) + t * \frac{n+m}{t}) = O(n+m+t*log(n+m))$
 \answer{2}
 
 \answer{3}
 
 \answer{4}
+Currently in the program there is an implicit barrier required after calculating the co-ranks:\\
+  \begin{lstlisting}
+  #pragma omp for SCHEDULE_STRATEGY
+  for (i = 0; i < t; i++) {
+      corank(i * (n + m) / t, A, n, &coj[i], B, m, &cok[i]);
+  }
+  \end{lstlisting}
+If we calculate the co-ranks twicr per block as follows we can get rid of this synchronisation:
+  \begin{lstlisting}
+  if(omp_get_thread_num != t-1){
+    corank(omp_get_thread_num * (n + m) / t, A, n, &coj[i], B, m, &cok[i]);
+    corank((omp_get_thread_num + 1) * (n + m) / t, A, n, &coj[i], B, m, &cok[i]);
+  }
+  seq_merge1(&A[coj[i]], coj[omp_get_thread_num + 1] - coj[omp_get_thread_num], &B[cok[i]], cok[omp_get_thread_num + 1] - cok[omp_get_thread_num], &C[omp_get_thread_num * (n + m) / t]);
+  \end{lstlisting}
 
 \exercise{7}
 
