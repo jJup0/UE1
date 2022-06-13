@@ -210,7 +210,7 @@ for (i=0; i<n; i++) a[i] = b[i];
 \end{lstlisting}
 
 \answer{1}
-The program sorts a given array of integers in ascending order. A comparison with "$a \leq \ b$" has to be done in for all b that come before a, so that the program also sorts array with duplicates. If $<=$ is not used for all b that come before a, all duplicates will end up at the same index in the result, causing ``gaps'' (some array entries will have undefined/default initialization value). Using $<=$ also guarantees stability, meaning that the relative order of equal elements in the input will be sustained in the output.
+The program sorts a given array of integers in ascending order. A comparison with "$a \leq \ b$" has to be done in for all b that come before a, so that the program also sorts array with duplicates. If $\leq$ is not used for all b that come before a, all duplicates will end up at the same index in the result, causing ``gaps'' (some array entries will have undefined/default initialization value). Using $\leq$ also guarantees stability, meaning that the relative order of equal elements in the input will be sustained in the output.
 
 \answer{2}
 The asymptotic sequential work of the given algorithm is $O(n^{2})$. The outer loop is executed n times. Within this loop, there are two nested loops which have a total of $n-1 (= O(n))$ iterations (j run from 0 to i, and then from i + 1 to n), each with $O(1)$ work. After the first (outer) loop, there is another loop which is executed n times, with $O(1)$ work per iteration. This concludes to the work of $O(n^{2})$. Here is the code once again, with explanation regarding work in the comments:
@@ -220,7 +220,7 @@ The asymptotic sequential work of the given algorithm is $O(n^{2})$. The outer l
 \begin{lstlisting}
 for (i=0; i<n; i++) {            // canonical loop dependent on n
   int count = 0;                 // constant work
-  for (j=0; j<i; j++) {          // canonical loop dependent on i
+  for (j=0; j<i; j++) {          // linear loop dependent on i
     if (a[j]<=a[i]) count++;     // constant work
   }
   j++;                           // constant work
@@ -232,11 +232,8 @@ for (i=0; i<n; i++) {            // canonical loop dependent on n
 for (i=0; i<n; i++)              // canonical loop dependent on n
   a[i] = b[i];                   // constant work
 \end{lstlisting}
-
-% TODO REVIEW exact iterations?
-\begin{math}n*(1 + n*(1) + 1 + n*(1) + 1) + n*(1) =\end{math}\\
-\begin{math}n*(n + 3) + n =\end{math}\\
-\begin{math}n^2 + 4n\end{math}\\
+\noindent
+\begin{math}n \cdot (1 + n \cdot 1 + 1 + n \cdot 1 + 1) + n \cdot 1 = n \cdot (n + 3) + n = n^2 + 4n\end{math}\\
 \begin{math}n^2 + 4n \in O(n^2)\end{math}\\
 This is a very simplified calculation. The j-loop's workload rises as the i-loop's workload shrinks. Generally, within one outer-loop iteration, the sum of the iterations of the first and second j-loop together is n. However, it does not make in difference for the big O notation.
 
