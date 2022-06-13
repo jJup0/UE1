@@ -28,7 +28,7 @@ NOW=${NOW//"/"/"-"}
 
 SOURCE_ROOT="$HOME/UE1/mpimv-student-1.0.0-Source"
 OUT_FOLDER="${SOURCE_ROOT}/job_outputs/${TEST}/run_${NOW}${TAGNAME}/"
-SEQ_OUT_FOLDER="${SOURCE_ROOT}/job_outputs/seq/run_${NOW}${TAGNAME}/"
+SEQ_OUT_FOLDER="${SOURCE_ROOT}/job_outputs/mvseq/${TEST}_run_${NOW}${TAGNAME}/"
 $(mkdir ${OUT_FOLDER})
 $(mkdir ${SEQ_OUT_FOLDER})
 #### end my stuff #### 
