@@ -116,7 +116,7 @@ make_graph = function(results_matrix,
     print(plot_to_draw)
     if (saveFileBool) {
       ggsave(sprintf(
-        "./merge_plot_%s_%d.pdf",
+        "./matrix_vector_plot_%s_%d.pdf",
         gsub(" ", "-", title),
         ns[ns_idx]
       ))
@@ -135,8 +135,8 @@ ps = c(1, 16, 32)
 mv1_seq_times = get_seq_times_mv("mvseq/mv1_run_06-13-22[14_08_37]", "mv1_seq", c(1))
 mv2_seq_times = get_seq_times_mv("mvseq/mv2_run_06-13-22[14_08_44]", "mv2_seq", c(1))
 
-titles = c("MPI_Allgatherv",
-           "MPI_Reduce_scatter")
+titles = c("Row-wise distribution",
+           "Column-wise distribution")
 
 mv_names = c("mv1",
              "mv2")
