@@ -15,3 +15,5 @@ exercisesandprojects.pdf
 /build/
 *.Rhistory
 *slurm-*.out
+
+*_CPack_Packages/
