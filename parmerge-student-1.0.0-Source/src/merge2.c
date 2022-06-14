@@ -7,22 +7,6 @@
 
 #define SCHEDULE_STRATEGY schedule(auto)
 
-void printLongArray(long* array, long n) {
-    fprintf(stderr, "[%ld", array[0]);
-    for (long i = 1; i < n; i++) {
-        fprintf(stderr, ", %ld", array[i]);
-    }
-    fprintf(stderr, "]\n");
-}
-
-void printIntArray(int* array, int n) {
-    fprintf(stderr, "[%d", array[0]);
-    for (int i = 1; i < n; i++) {
-        fprintf(stderr, ", %d", array[i]);
-    }
-    fprintf(stderr, "]\n");
-}
-
 int min(int A, int b) { return (A <= b) ? A : b; }
 
 int max(int A, int b) { return (A > b) ? A : b; }
@@ -50,7 +34,6 @@ void corank(int i, double A[], long m, int* corank_a, double B[], long n, int* c
             *corank_b = k;
             return;
         }
-        // fprintf(stderr, "active: %d, j_low: %d, k_low: %d || B[k-1], B[k] = [%.1f, %.1f] || A[j-1], A[j] = [%.1f, %.1f]  \n", active, j_low, k_low, B[k - 1], B[k], A[j - 1], A[j]);
     }
 }
 
@@ -77,7 +60,3 @@ void merge(double A[], long n, double B[], long m, double C[]) {
         }
     }
 }
-
-/*
- ./bin/merge2_tester -n 10000000 -m 20000000 -p 4 -c
-*/
