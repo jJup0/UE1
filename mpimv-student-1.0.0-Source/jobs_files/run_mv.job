@@ -28,7 +28,9 @@ NOW=${NOW//"/"/"-"}
 
 SOURCE_ROOT="$HOME/UE1/mpimv-student-1.0.0-Source"
 OUT_FOLDER="${SOURCE_ROOT}/job_outputs/${TEST}/run_${NOW}${TAGNAME}/"
+SEQ_OUT_FOLDER="${SOURCE_ROOT}/job_outputs/mvseq/${TEST}_run_${NOW}${TAGNAME}/"
 $(mkdir ${OUT_FOLDER})
+$(mkdir ${SEQ_OUT_FOLDER})
 #### end my stuff #### 
 
 BINARY="${SOURCE_ROOT}/bin/${TEST}"
@@ -42,9 +44,9 @@ do
    for (( j=0; j<${plen}; j++ ));
    do
       ppn=${PPN[$j]}
-      srun --ntasks-per-node=$ppn ${BINARY} -n $n -r ${NREP} > "${OUT_FOLDER}output_${TEST}_${ppn}_${n}.out"
+      srun --ntasks-per-node=$ppn ${BINARY} -n $n -r ${NREP} > "${OUT_FOLDER}output_${TEST}_${n}_${ppn}.out"
    done
-   srun -N 1 --ntasks-per-node=1 ${BINARY} -n $n -r ${NREP} > "${OUT_FOLDER}output_${TEST}_seq_${n}.out"
+   srun -N 1 --ntasks-per-node=1 ${BINARY} -n $n -r ${NREP} > "${SEQ_OUT_FOLDER}output_${TEST}_seq_${n}_1.out"
 done
 
 # cd ~/UE1/mpimv-student-1.0.0-Source/jobs_files; sbatch run_mv.job; cd ..
