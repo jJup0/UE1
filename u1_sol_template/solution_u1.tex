@@ -154,6 +154,7 @@ void mv(int m, int n, double M[m][n], double V[n], double W[m]){
   // O(log(n)) loops
   while(offset < m){
     // duplicating existing vectors in O(1)
+    // offset, m private for each thread i.e in OpenMP firstprivate(offset, m)
     par(0<=i<m){
       if(i + offset < m){
         par(0<=j<n){
@@ -175,6 +176,7 @@ void mv(int m, int n, double M[m][n], double V[n], double W[m]){
     // sum row [i] of Matrix in O(log(n)) time steps
     while(offset < n){
       // EREW summing, actually only n/betweenGap processors needed
+      // offset, n private for each thread i.e in OpenMP firstprivate(offset, n)
       par(0<=j<n) {
         if(offset + j * betweenGap < n){
           M[i][j * betweenGap] += M[i][offset + j * betweenGap];
@@ -299,13 +301,13 @@ t[i] tracks how many iterations were executed by thread \emph{i}.
   \toprule
  case /  $i$ & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 & 13 & 14 & 15 & 16 & 17 & 18  \\
   \midrule
-\texttt{static}     & 0 & 0 & 0 & 1 & 1 & 1 & 2 & 2 & 2 & 3 & 3 & 3 & 4 & 4 & 4 & 5 & 5 & 5 & 0 \\
+\texttt{static}     & 0 & 0 & 0 & 0 & 1 & 1 & 1 & 2 & 2 & 2 & 3 & 3 & 3 & 4 & 4 & 4 & 5 & 5 & 5 \\
 \texttt{static,2}   & 0 & 0 & 1 & 1 & 2 & 2 & 3 & 3 & 4 & 4 & 5 & 5 & 0 & 0 & 1 & 1 & 2 & 2 & 3 \\
 \texttt{static,5}   & 0 & 0 & 0 & 0 & 0 & 1 & 1 & 1 & 1 & 1 & 2 & 2 & 2 & 2 & 2 & 3 & 3 & 3 & 3 \\
 \texttt{static,6}   & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 1 & 1 & 1 & 1 & 1 & 2 & 2 & 2 & 2 & 2 & 2 & 3 \\ 
-\texttt{dynamic,1}  & 0 & 1 & 2 & 3 & 4 & 5 & 0 & 1 & 2 & 3 & 4 & 5 & 0 & 1 & 2 & 3 & 4 & 5 & 0 \\
-\texttt{dynamic,2}  & 0 & 0 & 1 & 1 & 2 & 2 & 3 & 3 & 4 & 4 & 5 & 5 & 0 & 0 & 1 & 1 & 2 & 2 & 3 \\
-  \texttt{guided,3} & 0 & 0 & 0 & 1 & 1 & 1 & 2 & 2 & 2 & 3 & 3 & 3 & 4 & 4 & 4 & 5 & 5 & 5 & 0 \\
+\texttt{dynamic,1}  & 0 & 2 & 5 & 0 & 0 & 0 & 2 & 1 & 5 & 4 & 2 & 3 & 5 & 1 & 0 & 2 & 4 & 5 & 3 \\
+\texttt{dynamic,2}  & 0 & 0 & 4 & 4 & 1 & 1 & 3 & 3 & 5 & 5 & 2 & 2 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+  \texttt{guided,3} & 0 & 0 & 0 & 0 & 4 & 4 & 4 & 1 & 1 & 1 & 0 & 0 & 0 & 5 & 5 & 5 & 4 & 4 & 4 \\
   \bottomrule
 \end{tabular}\\
 
@@ -317,9 +319,9 @@ case / $t$             & $t[0]$ & $t[1]$ & $t[2]$ & $t[3]$ & $t[4]$ & $t[5]$ \\
 \texttt{static,2}  & 4 & 4 & 4 & 3 & 2 & 2 \\
 \texttt{static,5}  & 5 & 5 & 5 & 4 & 0 & 0 \\
 \texttt{static,6}  & 6 & 6 & 6 & 1 & 0 & 0 \\
-\texttt{dynamic,1} & 4 & 3 & 3 & 3 & 3 & 3 \\
-\texttt{dynamic,2} & 4 & 4 & 4 & 3 & 2 & 2 \\
-\texttt{guided,3}  & 4 & 3 & 3 & 3 & 3 & 3 \\
+\texttt{dynamic,1} & 5 & 2 & 4 & 2 & 2 & 4 \\
+\texttt{dynamic,2} & 9 & 2 & 2 & 2 & 2 & 2 \\
+\texttt{guided,3}  & 7 & 3 & 0 & 0 & 6 & 3 \\
     \bottomrule
 \end{tabular}
 
@@ -327,6 +329,7 @@ case / $t$             & $t[0]$ & $t[1]$ & $t[2]$ & $t[3]$ & $t[4]$ & $t[5]$ \\
 False sharing is a possible performance issue:
 Multiple threads (on different cores) may want to access t (at different indexes i and j) at close points in time. If two indexes i, j are close enough and positioned in a way that t[i] and t[j] are on the same cache line, and t[i] t[j] are accessed by different threads, they will be ``falsely shared'' and cache coherency activity will occur, which impacts performance considerably. 
 
+\newpage
 \exercise{4}
 
 \begin{lstlisting}
@@ -375,9 +378,9 @@ Looking at the benchmark plots, a very definitive absolute speed-up can be recog
 To make the merge stable, nothing has to be done to preserve relative order of equal elements in A as well as B in C.
 To make sure equal elements of A come before equal elements of B: \\
 Rewrite rank algorithm:\\
-rank{\_}for{\_}A(a, B, m) returns a j such that B[j] < a <= B[j + 1] \\
+rank{\_}for{\_}A(a, B, m) returns a j such that $B[j] < a \leq B[j + 1]$ \\
 and another algorithm: \\
-rank{\_}for{\_}B(b, A, n) returns an i such that A[i] <= b < A[i + 1]
+rank{\_}for{\_}B(b, A, n) returns an i such that $A[i] \leq b < A[i + 1]$
 
 
 \exercise{6}
@@ -408,7 +411,11 @@ void merge_corank(double A[], int n, double B[], int m, double C[])
 \answer{1}
 The asymptotic complexity can be calculated as follows:\\
 \\
-$O(t \cdot log(n+m) + t \cdot \frac{n+m}{t}) = O(n + m + t \cdot log(n+m))$
+$O(t \cdot log(n+m) + t \cdot \frac{n+m}{t}) = O(n + m + t \cdot log(n+m)) = T_{seq}(n,m)$
+\\
+\\
+To compare this to the sequential complexity $t=1$ should be chosen  
+
 \answer{2}
 
 \answer{3}
