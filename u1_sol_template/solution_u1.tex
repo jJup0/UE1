@@ -16,6 +16,7 @@ headings=normal,
 \usepackage{booktabs}
 \usepackage{listings}
 
+\usepackage{pdfpages}
 \usepackage{graphicx}
 \graphicspath{ {../plots/} }
 
@@ -362,12 +363,12 @@ A parallel section is opened, with to omp for constructs. In the first for-const
 
 \answer{2}
 
-% TODO make look nice, use speed up
 
-\includegraphics[width=\plotwidth, height=\plotheight]{merge_plot_Rank-each-Element_1000000_2000000.png}\\
-\includegraphics[width=\plotwidth, height=\plotheight]{merge_plot_Rank-each-Element_10000000_20000000.png}\\
-\includegraphics[width=\plotwidth, height=\plotheight]{merge_plot_Rank-each-Element_100000000_200000000.png}\\
+\includegraphics[scale=0.4,page=1]{../plots/merge_plot_Rank-each-element_1000000_2000000}
+\includegraphics[scale=0.4,page=1]{../plots/merge_plot_Rank-each-element_10000000_20000000} \\
+\includegraphics[scale=0.4,page=1]{../plots/merge_plot_Rank-each-element_100000000_200000000} \\
 
+Looking at the benchmark plots, a very definitive absolute speed-up can be recognized for all 3 input sizes. This makes sense there should be a linear speed up for $p < m + n$
 
 
 \answer{3}
