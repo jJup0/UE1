@@ -33,6 +33,7 @@ headings=normal,
 \newcommand\plotwidth{0.8\textwidth}
 \newcommand\plotheight{0.48\textwidth}
 
+
 \begin{document}
 
 \noindent
@@ -76,8 +77,7 @@ TU Wien}
 
 \exercise{1}
 
-The source code snippets are just given here in case you would like to reuse them.
-You can remove them in your solution if you want.
+\begin{minipage}[t]{1.0\linewidth}
 \begin{lstlisting}
 void mv(int m, int n, double M[m][n], double V[n], double W[m])
 {
@@ -91,8 +91,10 @@ void mv(int m, int n, double M[m][n], double V[n], double W[m])
   }
 }
 \end{lstlisting}
+\end{minipage}
 
 \answer{1}
+\begin{minipage}[t]{1.0\linewidth}
 \begin{lstlisting}
 void mv(int m, int n, double M[m][n], double V[n], double W[m]){
   par(0<=i<m){
@@ -104,9 +106,11 @@ void mv(int m, int n, double M[m][n], double V[n], double W[m]){
   }
 }
 \end{lstlisting}
+\end{minipage}
 requires the CREW PRAM model
 \newpage
 \answer{2}
+\begin{minipage}[t]{1.0\linewidth}
 \begin{lstlisting}
 void mv(int m, int n, double M[m][n], double V[n], double W[m]) {
   
@@ -138,9 +142,11 @@ void mv(int m, int n, double M[m][n], double V[n], double W[m]) {
   }
 }
 \end{lstlisting}
+\end{minipage}
 requires the CREW PRAM model
 \newpage
 \answer{3}
+\begin{minipage}[t]{1.0\linewidth}
 \begin{lstlisting}
 void mv(int m, int n, double M[m][n], double V[n], double W[m]){
   double C[m][n];
@@ -193,10 +199,12 @@ void mv(int m, int n, double M[m][n], double V[n], double W[m]){
   }
 }
 \end{lstlisting}
+\end{minipage}
 requires the EREW PRAM model
 
 \exercise{2}
 
+\begin{minipage}[t]{1.0\linewidth}
 \begin{lstlisting}
 for (i=0; i<n; i++) {
   int count = 0;
@@ -211,6 +219,7 @@ for (i=0; i<n; i++) {
 }
 for (i=0; i<n; i++) a[i] = b[i];
 \end{lstlisting}
+\end{minipage}
 
 \answer{1}
 The program sorts a given array of integers in ascending order. A comparison with "$a \leq \ b$" has to be done in for all b that come before a, so that the program also sorts array with duplicates. If $\leq$ is not used for all b that come before a, all duplicates will end up at the same index in the result, causing ``gaps'' (some array entries will have undefined/default initialization value). Using $\leq$ also guarantees stability, meaning that the relative order of equal elements in the input will be sustained in the output.
@@ -220,6 +229,7 @@ The asymptotic sequential work of the given algorithm is $O(n^{2})$. The outer l
 
 % TODO REVIEW dependent on i is not canonical though?
 % TODO REVIEW not necessary?
+\begin{minipage}[t]{1.0\linewidth}
 \begin{lstlisting}
 for (i=0; i<n; i++) {            // canonical loop dependent on n
   int count = 0;                 // constant work
@@ -235,12 +245,14 @@ for (i=0; i<n; i++) {            // canonical loop dependent on n
 for (i=0; i<n; i++)              // canonical loop dependent on n
   a[i] = b[i];                   // constant work
 \end{lstlisting}
+\end{minipage}
 \noindent
 \begin{math}n \cdot (1 + n \cdot 1 + 1 + n \cdot 1 + 1) + n \cdot 1 = n \cdot (n + 3) + n = n^2 + 4n\end{math}\\
 \begin{math}n^2 + 4n \in O(n^2)\end{math}\\
 This is a very simplified calculation. The j-loop's workload rises as the i-loop's workload shrinks. Generally, within one outer-loop iteration, the sum of the iterations of the first and second j-loop together is n. However, it does not make in difference for the big O notation.
 
 \answer{3}
+\begin{minipage}[t]{1.0\linewidth}
 \begin{lstlisting}
 #include <omp.h>
 // assume a, b initialized arrays, each with a capacity of n integers
@@ -267,6 +279,7 @@ This is a very simplified calculation. The j-loop's workload rises as the i-loop
  }
 }
 \end{lstlisting}
+\end{minipage}
 
 \answer{4}
 The outer loop is embarrassingly parallel, because the iterations are independent of each other. Therefore, the speedup is linear (compared to the sequential execution of this algorithm). So assuming $n \geq p$ the runtime will be in:\\
@@ -283,6 +296,7 @@ The absolute speedup has to be compared with the best known sequantial algorithm
 
 
 \exercise{3}
+\begin{minipage}[t]{1.0\linewidth}
 \begin{lstlisting}
 # pragma omp parallel for schedule ( runtime )
 for (i = 0; i < n ; i++) {
@@ -290,6 +304,7 @@ for (i = 0; i < n ; i++) {
   t[omp_get_thread_num()]++;
 }
 \end{lstlisting}
+\end{minipage}
 \answer{1}
 a[i] tracks which thread executed iteration \emph{i} in the for loop.
 t[i] tracks how many iterations were executed by thread \emph{i}.
@@ -332,6 +347,7 @@ Multiple threads (on different cores) may want to access t (at different indexes
 \newpage
 \exercise{4}
 
+\begin{minipage}[t]{1.0\linewidth}
 \begin{lstlisting}
 i = 0; j = 0; k = 0; 
 while (i<n&&j<m) {
@@ -340,6 +356,7 @@ while (i<n&&j<m) {
 while (i<n) C[k++] = A[i++]; 
 while (j<m) C[k++] = B[j++];
 \end{lstlisting}
+\end{minipage}
 
 \answer{1}
 Assuming i, j, k are in registers. \\
@@ -385,6 +402,7 @@ rank{\_}for{\_}B(b, A, n) returns an i such that $A[i] \leq b < A[i + 1]$
 
 
 \exercise{6}
+\begin{minipage}[t]{1.0\linewidth}
 \begin{lstlisting}
 void merge_corank(double A[], int n, double B[], int m, double C[])
 {
@@ -407,6 +425,7 @@ void merge_corank(double A[], int n, double B[], int m, double C[])
   }
 }
 \end{lstlisting}
+\end{minipage}
 
 \answer{1}
 The asymptotic complexity can be calculated as follows:\\
@@ -422,14 +441,17 @@ To compare this to the sequential complexity $t=1$ should be chosen
 \newpage
 \answer{4}
 Currently in the program there is an implicit barrier required after calculating the co-ranks:\\
-  \begin{lstlisting}
+  \begin{minipage}[t]{1.0\linewidth}
+\begin{lstlisting}
   #pragma omp for SCHEDULE_STRATEGY
   for (i = 0; i < t; i++) {
       corank(i * (n + m) / t, A, n, &coj[i], B, m, &cok[i]);
   }
   \end{lstlisting}
+\end{minipage}
 If we calculate the co-ranks twicr per block as follows we can get rid of this synchronisation:
-  \begin{lstlisting}
+  \begin{minipage}[t]{1.0\linewidth}
+\begin{lstlisting}
   if(omp_get_thread_num != t-1){
     corank(omp_get_thread_num * (n + m) / t, A, n, &coj[i], B, m, &cok[i]);
     corank((omp_get_thread_num + 1) * (n + m) / t, A, n, &coj[i], B, m, &cok[i]);
@@ -438,9 +460,11 @@ If we calculate the co-ranks twicr per block as follows we can get rid of this s
   &B[cok[i]], cok[omp_get_thread_num + 1] - cok[omp_get_thread_num], 
   &C[omp_get_thread_num * (n + m) / t]);
   \end{lstlisting}
+\end{minipage}
 
 \exercise{7}
 
+\begin{minipage}[t]{1.0\linewidth}
 \begin{lstlisting}
 void merge_divconq(double A[], int n, double B[], int m, double C[])
 {
@@ -461,6 +485,7 @@ void merge_divconq(double A[], int n, double B[], int m, double C[])
   }
 }
 \end{lstlisting}
+\end{minipage}
 
 \answer{1}
 
