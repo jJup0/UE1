@@ -117,7 +117,7 @@ make_graph = function(results_matrix,
     print(plot_to_draw)
     if (saveFileBool) {
       ggsave(sprintf(
-        "./merge_plot_%s_%d_%d.png",
+        "./merge_plot_%s_%d_%d.pdf",
         gsub(" ", "-", title),
         ns[ns_idx],
         ms[ns_idx]
