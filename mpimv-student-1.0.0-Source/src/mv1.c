@@ -19,7 +19,7 @@
 */
 
 /*
-(n*m/p) + m + p
+(n*m/p) + n + p
 */
 void mv(base_t **A, int nrows, int ncols, int nrows_a_loc, int ncols_a_loc, base_t *x, int nrows_x_loc, base_t *b, int ncols_b_loc) {
     int rank, size;
@@ -40,7 +40,7 @@ void mv(base_t **A, int nrows, int ncols, int nrows_a_loc, int ncols_a_loc, base
     // p + log(p)
     MPI_Allgather(&displs[rank], 1, MPI_INT, displs, 1, MPI_INT, MPI_COMM_WORLD);
 
-    // m + log(p)
+    // n + log(p)
     MPI_Allgatherv(x, nrows_x_loc, MPI_DOUBLE, completeX, recvcounts, displs, MPI_DOUBLE, MPI_COMM_WORLD);
 
     // m*n/p

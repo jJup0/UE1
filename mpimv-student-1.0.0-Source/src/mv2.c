@@ -7,7 +7,7 @@
 #include "mv.h"
 
 /*
-(n*m/p) + n + p
+(n*m/p) + m + p
 */
 void mv(base_t **A, int nrows, int ncols, int nrows_a_loc, int ncols_a_loc, base_t *x, int nrows_x_loc, base_t *b, int ncols_b_loc) {
     int size;
@@ -27,7 +27,7 @@ void mv(base_t **A, int nrows, int ncols, int nrows_a_loc, int ncols_a_loc, base
     // p + log(p)
     MPI_Allgather(&ncols_a_loc, 1, MPI_INT, counts, 1, MPI_INT, MPI_COMM_WORLD);
 
-    // n + log(p)
+    // m + log(p)
     MPI_Reduce_scatter(localB, b, counts, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
     free(localB);
 }
