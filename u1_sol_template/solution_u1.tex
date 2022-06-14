@@ -378,12 +378,14 @@ Total cache misses: 2n, \textbf{cache miss rate:} 1.0
 \exercise{5}
 
 \answer{1}
-A parallel section is opened, with to omp for constructs. In the first for-construct every element in \emph{A} is ranked in the array \emph{B} and inserted accordingly in \emph{C}. It is marked as no wait, as there are no data conflicts. In the second for-construct every element in \emph{B} is ranked in the array \emph{A} and then inserted accordingly in \emph{C}. Ranking is done sequentially by binary search in O(log(n)), inserting into \emph{C} is done for n + m elements in parallel, in O(1) time. Therefore the runtime is $ O((n + m)/p \cdot log(n))$.
+A parallel section is opened, with to omp for constructs. In the first for-construct every element in \emph{A} is ranked in the array \emph{B} and inserted accordingly in \emph{C}. It is marked as no wait, as there are no data conflicts. In the second for-construct every element in \emph{B} is ranked in the array \emph{A} and then inserted accordingly in \emph{C}. Ranking is done sequentially by binary search in O(log(n)), inserting into \emph{C} is done for n + m elements in parallel, in O(1) time. Therefore the runtime is $ O\left(\frac{n}{p} \cdot \log(m) \right) + O\left(\frac{m}{p} \cdot \log(n)\right) = 
+O\left(\frac{n \cdot \log(m) + m \cdot \log(n)}{p}\right)$.
+\\
+\\
+Code can be found in \textit{mv1.c}
 
 
 \answer{2}
-
-
 \includegraphics[scale=0.4,page=1]{../plots/merge_plot_Rank-each-element_1000000_2000000}
 \includegraphics[scale=0.4,page=1]{../plots/merge_plot_Rank-each-element_10000000_20000000} \\
 \includegraphics[scale=0.4,page=1]{../plots/merge_plot_Rank-each-element_100000000_200000000} \\
@@ -400,7 +402,7 @@ rank{\_}for{\_}A(a, B, m) returns a j such that $B[j] < a \leq B[j + 1]$ \\
 and another algorithm: \\
 rank{\_}for{\_}B(b, A, n) returns an i such that $A[i] \leq b < A[i + 1]$
 
-
+\newpage
 \exercise{6}
 \begin{minipage}[t]{1.0\linewidth}
 \begin{lstlisting}
@@ -430,15 +432,14 @@ void merge_corank(double A[], int n, double B[], int m, double C[])
 \answer{1}
 The asymptotic complexity can be calculated as follows:\\
 \\
-$O(t \cdot log(n+m) + t \cdot \frac{n+m}{t}) = O(n + m + t \cdot log(n+m)) = T_{seq}(n,m)$
+$O\left(t \cdot \log(n+m) + t \cdot \frac{n+m}{t} \right) = O(n + m + t \cdot \log(n+m)) = T_{seq}(n,m)$
 \\
 \\
 To compare this to the sequential complexity $t=1$ should be chosen  
 
 \answer{2}
-
+Code can be found in \textit{merge2.c}
 \answer{3}
-
 \answer{4}
 Currently in the program there is an implicit barrier required after calculating the co-ranks:\\
   \begin{minipage}[t]{1.0\linewidth}
@@ -488,27 +489,42 @@ void merge_divconq(double A[], int n, double B[], int m, double C[])
 \end{minipage}
 
 \answer{1}
-
+Code can be found in \textit{merge3.c}
 \answer{2}
 Testing empirically showed that a very good cut-off value can be calculated with the following function $cutoff(n,m,t) = \frac{n \cdot m}{t}$.
 where n and m are the lengths of the arrays A and B before performing any recursion steps
 
 \answer{3}
+\includegraphics[scale=0.4,page=1]{../plots/merge_plot_Divide-and-Conquer_1000000_2000000}
+\includegraphics[scale=0.4,page=1]{../plots/merge_plot_Divide-and-Conquer_10000000_20000000}
+\includegraphics[scale=0.4,page=1]{../plots/merge_plot_Divide-and-Conquer_100000000_200000000}
+\\
+\\
+In the first plot we can see that the speed up monotonically increases up to using 16 processors, but then the overhead gets to large and the speed up starts to decrease. On the other two plots with larger problem instances this behaviour can't be observed.
 \exercise{8}
 
 \answer{1}
-\emph{Code can be found in mv1.c}
+Code can be found in\textit{mv1.c}
 
 \answer{2}
-We would expect the algorithm to have a linear relaitive speedup, due to a good load balance on the processes - as long as $p \leq\ n$  (rows of the matrix $A$). Generating the sub-input is manageable in $O(\frac{m \cdot n}{p})$ The complexity of the multiplication one process has to calculate is in $\frac{m \cdot n}{p}$. The complexities of all MPI-functions must be added. MPI\_Allgather,  MPI\_Allgatherv and MPI\_Exscan run in $O(n + log(p))$. As for Allgatherv, the input size is dependent on m (number of columns in matrix $A$), so $(m + log(p))$ has to be added. As for the other calls, the input size is dependent on $p$, so $(p + log(p))$ has to be added as well. After simplification, the complexity should be $O(\frac{m \cdot n}{p} + m + p)$.\\
-The best known sequential algorithm for matrix-vector multiplication runs in $O(m \cdot n)$. However, if we do not use more processes than input lines $n$, both $m$ and $p$ will be dominated by $\frac{m \cdot n}{p}$.\\
-\begin{math}S_{p}(n)=\frac{T_{seq}(n)}{T_{par}(p,n)} = \frac{m \cdot n}{(m \cdot n)/p } = p \end{math} (if $p \leq\ n$)\\
-In worst case, the speedup is not linear anymore:\\
-\begin{math}S_{p}(n)=\frac{T_{seq}(n)}{T_{par}(p,n)} = \frac{m \cdot n}{m \cdot n/p + m + p} = \frac{m \cdot n \cdot p}{m \cdot n + p \cdot  m + p^2} = \frac{p}{1 + p/n + p^2/(m \cdot n)} = \frac{n \cdot p}{n + p + p^2/m}\end{math}\\
-In not too many processes are used (as stated above), then the parallel efficiency would be 1:\\
-\begin{math}E_{p}(n)=\frac{T_{seq}(n)}{pT_{par}(p,n)} = \frac{m \cdot n}{p \cdot (m \cdot n)/p} = 1 \end{math}\\
-If too many $p$ will be used, the errifiency will turn into:\\
-\begin{math}E_{p}(n)=\frac{T_{seq}(n)}{pT_{par}(p,n)} = \frac{1}{1 + p/n + p^2/(m \cdot n)} \end{math}\\
+We would expect the algorithm to have a linear relaitive speedup, due to a good load balance on the processes - as long as $p \leq n$  (rows of the matrix $A$). Generating the sub-input is manageable in $O\left(\frac{m \cdot n}{p}\right)$ The complexity of the multiplication one process has to calculate is in $\frac{m \cdot n}{p}$. The complexities of all MPI-functions must be added. MPI\_Allgather,  MPI\_Allgatherv and MPI\_Exscan run in $O(n + \log(p))$. As for Allgatherv, the input size is dependent on m (number of columns in matrix $A$), so $(m + log(p))$ has to be added. As for the other calls, the input size is dependent on $p$, so $(p + log(p))$ has to be added as well. After simplification, the complexity should be $O\left(\frac{m \cdot n}{p} + m + p\right)$.\\
+
+\noindent The best known sequential algorithm vor matrix-vector multiplication runs in $O(m \cdot n)$. However, if we do not use more processes than input lines $n$, both $m$ and $p$ will be dominated by $\frac{m \cdot n}{p}$.
+\\[0.5 em]
+$S_{p}(n)=\frac{T_{seq}(n)}{T_{par}(p,n)} = \frac{m \cdot n}{(m \cdot n)/p } = p$ (if $p \leq\ n$)
+\\[0.5 em]
+In worst case, the speedup is not linear anymore:
+\\[0.5 em]
+$\displaystyle S_{p}(n)=\frac{T_{seq}(n)}{T_{par}(p,n)} = \frac{m \cdot n}{m \cdot n/p + m + p} = \frac{m \cdot n \cdot p}{m \cdot n + p \cdot  m + p^2} = \frac{p}{1 + p/n + p^2/(m \cdot n)} = \frac{n \cdot p}{n + p + p^2/m}$
+\\[0.5 em]
+In not too many processes are used (as stated above), then the parallel efficiency would be 1:
+\\[0.5 em]
+$\displaystyle E_{p}(n)=\frac{T_{seq}(n)}{pT_{par}(p,n)} = \frac{m \cdot n}{p \cdot (m \cdot n)/p} = 1$
+\\[0.5 em]
+If too many $p$ will be used, the errifiency will turn into:
+\\[0.5 em]
+$\displaystyle E_{p}(n)=\frac{T_{seq}(n)}{pT_{par}(p,n)} = \frac{1}{1 + p/n + p^2/(m \cdot n)}$
+\\[0.5 em]
 As we can see, the efficiency will drop further the more we increase $p$.
 
 
@@ -523,18 +539,25 @@ For smaller input sizes ($\leq$1200) the average time increases with increased p
 \exercise{9}
 
 \answer{1}
-
+Code can be found in \textit{mv2.c}
 \answer{2}
-We would expect the algorithm to have a linear relaitive speedup, due to a good load balance on the processes - as long as $p \leq\ m$  (columns of the matrix $A$). Generating the sub-input is manageable in $O(\frac{m \cdot n}{p})$. The complexity of the multiplication one process has to calculate is in $\frac{m \cdot n}{p}$. The complexities of all MPI-functions must be added. MPI\_Allgather,  MPI\_Reduce\_scatter run in $O(n + log(p))$. As for Reduce\_scatter, the input size is dependent on n (number of rows in matrix $A$), so $(n + log(p))$ has to be added. As for Allgather, the input size is dependent on $p$, so $(p + log(p))$ has to be added as well. After simplification, the complexity should be $O(\frac{m \cdot n}{p} + n + p)$.\\
+We would expect the algorithm to have a linear relaitive speedup, due to a good load balance on the processes - as long as $p \leq\ m$  (columns of the matrix $A$). Generating the sub-input is manageable in $O\left(\frac{m \cdot n}{p}\right)$. The complexity of the multiplication one process has to calculate is in $\frac{m \cdot n}{p}$. The complexities of all MPI-functions must be added. MPI\_Allgather,  MPI\_Reduce\_scatter run in $O(n + \log(p))$. As for Reduce\_scatter, the input size is dependent on n (number of rows in matrix $A$), so $(n + \log(p))$ has to be added. As for Allgather, the input size is dependent on $p$, so $(p + \log(p))$ has to be added as well. After simplification, the complexity should be $O\left(\frac{m \cdot n}{p} + n + p\right)$.\\
 
 \noindent The best known sequential algorithm for matrix-vector multiplication runs in $O(m \cdot n)$. However, if we do not use more processes than input lines $n$, both $m$ and $p$ will be dominated by $\frac{m \cdot n}{p}$.\\
-\begin{math}S_{p}(n)=\frac{T_{seq}(n)}{T_{par}(p,n)} = \frac{m \cdot n}{(m \cdot n)/p } = p \end{math} (if $p \leq\ m$)\\
-In worst case, the speedup is not linear anymore:\\
-\begin{math}S_{p}(n)=\frac{T_{seq}(n)}{T_{par}(p,n)} = \frac{m \cdot n}{m \cdot n/p + n + p} = \frac{m \cdot n \cdot p}{m \cdot n + p \cdot  n + p^2} = \frac{p}{1 + p/m + p^2/(m \cdot n)} = \frac{m \cdot p}{m + p + p^2/n}\end{math}\\
-In not too many processes are used (as stated above), then the parallel efficiency would be 1:\\
-\begin{math}E_{p}(n)=\frac{T_{seq}(n)}{pT_{par}(p,n)} = \frac{m \cdot n}{p \cdot (m \cdot n)/p} = 1 \end{math}\\
-If too many $p$ will be used, the errifiency will turn into:\\
-\begin{math}E_{p}(n)=\frac{T_{seq}(n)}{pT_{par}(p,n)} = \frac{1}{1 + p/n + p^2/(m \cdot n)} \end{math}\\
+$\displaystyle S_{p}(n)=\frac{T_{seq}(n)}{T_{par}(p,n)} = \frac{m \cdot n}{(m \cdot n)/p } = p$ (if $p \leq\ m$)
+\\[0.5 em]
+In worst case, the speedup is not linear anymore:
+\\[0.5 em]
+$\displaystyle S_{p}(n)=\frac{T_{seq}(n)}{T_{par}(p,n)} = \frac{m \cdot n}{m \cdot n/p + n + p} = \frac{m \cdot n \cdot p}{m \cdot n + p \cdot  n + p^2} = \frac{p}{1 + p/m + p^2/(m \cdot n)} = \frac{m \cdot p}{m + p + p^2/n}$
+\\[0.5 em]
+In not too many processes are used (as stated above), then the parallel efficiency would be 1:
+\\[0.5 em]
+$\displaystyle E_{p}(n)=\frac{T_{seq}(n)}{pT_{par}(p,n)} = \frac{m \cdot n}{p \cdot (m \cdot n)/p} = 1 $
+\\[0.5 em]
+If too many $p$ will be used, the errifiency will turn into:
+\\[0.5 em]
+$\displaystyle E_{p}(n)=\frac{T_{seq}(n)}{pT_{par}(p,n)} = \frac{1}{1 + p/n + p^2/(m \cdot n)} $
+\\[0.5 em]
 As we can see, the efficiency will drop further the more we increase $p$.
 
 \answer{3}
