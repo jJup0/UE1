@@ -5,7 +5,6 @@
 #include <stdlib.h>
 
 #include "mv.h"
-#include "utils.h"
 
 /*
 (n*m/p) + n + p
@@ -13,12 +12,10 @@
 void mv(base_t **A, int nrows, int ncols, int nrows_a_loc, int ncols_a_loc, base_t *x, int nrows_x_loc, base_t *b, int ncols_b_loc) {
     int size;
     MPI_Comm_size(MPI_COMM_WORLD, &size);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    base_t *localB;
-    alloc_vector(&localB, ncols);
+    base_t *localB = (base_t *)malloc(ncols * sizeof(base_t));
 
-    //n*m/p
+    // n*m/p
     for (int i = 0; i < nrows; i++) {
         localB[i] = 0;
         for (int j = 0; j < ncols_a_loc; j++) {
@@ -32,7 +29,5 @@ void mv(base_t **A, int nrows, int ncols, int nrows_a_loc, int ncols_a_loc, base
 
     // n + log(p)
     MPI_Reduce_scatter(localB, b, counts, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-    free_vector(localB);
+    free(localB);
 }
-
-// srun -p q_student -t 1 -N 3 --ntasks-per-node=7 ./bin/mv2 -n 311 -r 1 -c
