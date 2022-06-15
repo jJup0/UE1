@@ -84,7 +84,7 @@ void corank(int i, double A[], long n,  int* corank_a, double B[], long m, int* 
 void merge(double A[], long n, double B[], long m, double C[]) {
     int coj[omp_get_max_threads() + 1];
     int cok[omp_get_max_threads() + 1];
-#pragma omp parallel default(shared|none) shared(A, n, B, m, C, coj, cok)
+#pragma omp parallel default(none) shared(A, n, B, m, C, coj, cok)
     {
         int t = omp_get_num_threads();
         int i;

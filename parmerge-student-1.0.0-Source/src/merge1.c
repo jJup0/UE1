@@ -45,7 +45,7 @@ int rank(double val, double A[], int n) {
  * @param C array a and b are being merged into
  */
 void merge(double A[], long n, double B[], long m, double C[]) {
-#pragma omp parallel
+#pragma omp parallel default(none) shared(A, n, B, m, C)
     {
         int i;
         int j;
