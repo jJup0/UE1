@@ -39,10 +39,10 @@ int max(int a, int b) {
  * @param i: index in array C for which the coranks are computed
  * @param A: sorted array
  * @param n: length of A
- * @param corank_a points to the address where the corank of the array A is stored
+ * @param corank_a: points to the address where the corank of the array A is stored
  * @param B: sorted array
  * @param m: legnth of B
- * @param corank_b points to the address where the corank of the array B is stored
+ * @param corank_b: points to the address where the corank of the array B is stored
  */
 void corank(int i, double A[], long n,  int* corank_a, double B[], long m, int* corank_b) {
     int j = min(i, m);
@@ -79,7 +79,7 @@ void corank(int i, double A[], long n,  int* corank_a, double B[], long m, int* 
  * @param corank_a points to the address where the corank of the array A is stored
  * @param B: sorted array
  * @param m: legnth of B
- * @param corank_b points to the address where the corank of the array B is stored
+ * @param corank_b: points to the address where the corank of the array B is stored
  */
 void merge(double A[], long n, double B[], long m, double C[]) {
     int coj[omp_get_max_threads() + 1];

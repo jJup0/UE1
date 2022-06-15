@@ -15,15 +15,15 @@
 /**
  * @brief This function returns the rank of an element val in the array arr with length n.
  * @param val element that is being ranked
- * @param arr array that is being ranked into
- * @param n length of the array arr
+ * @param Arr array that is being ranked into
+ * @param n length of the array A
  */
-int rank(double val, double arr[], int n) {
+int rank(double val, double Arr[], int n) {
     int lo = 0;
     int hi = n - 1;
     while (lo <= hi) {
         int mid = (lo + hi) >> 1;
-        if (arr[mid] < val) {
+        if (Arr[mid] < val) {
             lo = mid + 1;
         } else {
             hi = mid - 1;
@@ -33,6 +33,20 @@ int rank(double val, double arr[], int n) {
     return lo;
 }
 
+/**
+ * @brief function that performs the merge.
+ * @details If one of the arrays A or B is already fully merged copying is performed using parallelized loops.
+ * If not it is checked if the problem size is already smaller than the cutoff value, then merging is performed sequentially.
+ * If this is not the case it is first checked if A is the bigger array, if not the arrays are swapped. After that the element in the middle of
+ * A is ranked and inserted into C in the correct psoition, followed with two recursive calls: one with the lower half and one with the upper half
+ * of the A and C array
+ * @param A: sorted array
+ * @param n: length of A
+ * @param B: sorted array
+ * @param m: legnth of B
+ * @param C: array a and b are being merged into
+ * @param CUTOFF: cutoff value to stop recursion
+ */
 void divAndConquerMergeSizeBalanceSwap(double A[], long n, double B[], long m, double C[], const long CUTOFF) {
     int i;
     if (n == 0) {
@@ -72,7 +86,7 @@ void merge(double A[], long n, double B[], long m, double C[]) {
     {
 #pragma omp master
         {
-            long CUTOFF = (m + n) / (omp_get_num_threads());  // each thread should perform approximately 3 seq merges
+            long CUTOFF = (m + n) / (omp_get_num_threads());
             divAndConquerMergeSizeBalanceSwap(A, n, B, m, C, CUTOFF);
         }
     }
