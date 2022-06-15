@@ -19,8 +19,8 @@
 /**
  * @brief This function performs a matrix-vector multiplication.
  * @param A pointer to the sub-matrix of a matrix to be multiplies with a vector
- * @param nrows the number of rows of the original matrix (not A) 
- * @param ncols the number of columns of the original matrix (not A) 
+ * @param nrows the number of rows of the original matrix (not A)
+ * @param ncols the number of columns of the original matrix (not A)
  * @param nrows_a_loc the number of rows this processor has to process the multiplication with
  * @param ncols_a_loc the number of columns this processor has to process the multiplication with (unnecessary here)
  * @param x pointer to a part of the original vector which is multiplied to the original matrix
@@ -37,10 +37,13 @@ void mv(base_t **A, int nrows, int ncols, int nrows_a_loc, int ncols_a_loc, base
     int *recvcounts = (int *)malloc(size * sizeof(int));
     int *displs = (int *)malloc(size * sizeof(int));
 
-    displs[0] = 0;
-    MPI_Exscan(&nrows_x_loc, &displs[rank], 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-
     MPI_Allgather(&nrows_x_loc, 1, MPI_INT, recvcounts, 1, MPI_INT, MPI_COMM_WORLD);
+
+    int curr_displ = 0;
+    for (int i = 0; i < size; i++) {
+        displs[i] = curr_displ;
+        curr_displ += recvcounts[i];
+    }
 
     MPI_Allgather(&displs[rank], 1, MPI_INT, displs, 1, MPI_INT, MPI_COMM_WORLD);
 
