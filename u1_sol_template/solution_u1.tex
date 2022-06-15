@@ -225,33 +225,35 @@ for (i=0; i<n; i++) a[i] = b[i];
 \end{minipage}
 
 \answer{1}
-The program sorts a given array of integers in ascending order. A comparison with "$a \leq \ b$" has to be done in for all b that come before a, so that the program also sorts array with duplicates. If $\leq$ is not used for all b that come before a, all duplicates will end up at the same index in the result, causing ``gaps'' (some array entries will have undefined/default initialization value). Using $\leq$ also guarantees stability, meaning that the relative order of equal elements in the input will be sustained in the output.
+The program sorts a given array of integers in ascending order. A comparison with "$a[j] \leq \ a[i]$" has to be done in for all $j$ where $j \leq i$, so that the program also sorts arrays with duplicates. If $\leq$ is not used for all$j \leq i$, values written into b (and subsequently back into a) will be written to the same index for the small values, causing ``gaps'' (some array entries in b (therefore also in a at the end) will have undefined/default initialization values). Using $\leq$ also guarantees stability, meaning that the relative order of equal elements in the input will be sustained in the output.
 
 \answer{2}
-The asymptotic sequential work of the given algorithm is $O(n^{2})$. The outer loop is executed n times. Within this loop, there are two nested loops which have a total of $n-1 (= O(n))$ iterations (j run from 0 to i, and then from i + 1 to n), each with $O(1)$ work. After the first (outer) loop, there is another loop which is executed n times, with $O(1)$ work per iteration. This concludes to the work of $O(n^{2})$. Here is the code once again, with explanation regarding work in the comments:
+The asymptotic sequential work of the given algorithm is $O(n^{2})$. The outer loop is executed n times. Within this loop, there are two nested loops which have a total of $n-1 (= O(n))$ iterations (j run from 0 to i, and then from i + 1 to n), each with $O(1)$ work. After the first (outer) loop, there is another loop which is executed n times, with $O(1)$ work per iteration. This concludes to the work of $O(n^{2})$. 
+% superfluous
+% Here is the code once again, with explanation regarding work in the comments:
 
-% TODO REVIEW dependent on i is not canonical though?
-% TODO REVIEW not necessary?
-\begin{minipage}[t]{1.0\linewidth}
-\begin{lstlisting}
-for (i=0; i<n; i++) {            // canonical loop dependent on n
-  int count = 0;                 // constant work
-  for (j=0; j<i; j++) {          // linear loop dependent on i
-    if (a[j]<=a[i]) count++;     // constant work
-  }
-  j++;                           // constant work
-  for (; j<n; j++) {             // linear loop dependent on the i-loop and n
-    if (a[j]<a[i]) count++;      // constant work
-  }
-  b[count] = a[i];               // constant work
-}
-for (i=0; i<n; i++)              // canonical loop dependent on n
-  a[i] = b[i];                   // constant work
-\end{lstlisting}
-\end{minipage}
+
+%\begin{minipage}[t]{1.0\linewidth}
+%\begin{lstlisting}
+%for (i=0; i<n; i++) {            // canonical loop dependent on n
+%  int count = 0;                 // constant work
+%  for (j=0; j<i; j++) {          // linear loop dependent on i
+%    if (a[j]<=a[i]) count++;     // constant work
+%  }
+%  j++;                           // constant work
+%  for (; j<n; j++) {             // linear loop dependent on the i-loop and n
+%    if (a[j]<a[i]) count++;      // constant work
+%  }
+%  b[count] = a[i];               // constant work
+%}
+%for (i=0; i<n; i++)              // canonical loop dependent on n
+%  a[i] = b[i];                   // constant work
+%\end{lstlisting}
+%\end{minipage}
 \noindent
-\begin{math}n \cdot (1 + i \cdot 1 + 1 + (n-i) \cdot 1 + 1) + n \cdot 1 = n \cdot (n + 3) + n = n^2 + 4n\end{math}\\
-\begin{math}n^2 + 4n \in O(n^2)\end{math}\\
+Exact calculation:
+$ n \cdot (1 + i \cdot 1 + 1 + (n-i) \cdot 1 + 1) + n \cdot 1 = n \cdot (n + 3) + n = n^2 + 4n $\\
+$n^2 + 4n \in O(n^2)$ \\
 This is a very simplified calculation. The j-loop's workload rises as the i-loop's workload shrinks. Generally, within one outer-loop iteration, the sum of the iterations of the first and second j-loop together is n. However, it does not make in difference for the big O notation.
 
 \answer{3}
@@ -395,7 +397,7 @@ Code can be found in \textit{merge1.c}
 
 % TODO review "discussion"
 \noindent
-Looking at the benchmark plots, a very definitive linear absolute speed-up can be recognized for all 3 input sizes. However even for 32 processors, it only lies around 0.6 (parallelization does not make sense for absolute speed up < 1). The graphs for the different input sizes look identical, only the y-axis scales for average times differ by factors of 10, which makes sense as the input sizes differ by factors of 10.
+Looking at the benchmark plots, a very definitive linear absolute speed-up can be recognized for all 3 input sizes. However even for 32 processors, it only lies around 0.6 (parallelization does not make sense for absolute speed up < 1). The graphs for the different input sizes look identical, only the y-axis scales for average times differ by factors of 10, which makes sense as the input sizes differ by factors of 10 and there should barely be any idle time as there is \textit{more than enough} work for each processor.
 
 \answer{3}
 To make the merge stable, nothing has to be done to preserve relative order of equal elements in A as well as B in C.
@@ -435,16 +437,23 @@ void merge_corank(double A[], int n, double B[], int m, double C[])
 \answer{1}
 The asymptotic complexity can be calculated as follows:\\
 \\
-$O\left(t \cdot \log(n+m) + t \cdot \frac{n+m}{t} \right) = O(n + m + t \cdot \log(n+m)) = T_{seq}(n,m)$
+$O\left(t \cdot \log(n+m) + t \cdot \frac{n+m}{t} \right) = O(n + m + t \cdot \log(n+m))$
 \\
 \\
-To compare this to the sequential complexity $t=1$ should be chosen  
+To compare this to the sequential complexity $t=1$ should be chosen (this way work done is also in $O(n+m)$).
 
 \answer{2}
 Code can be found in \textit{merge2.c}
 \answer{3}
+\includegraphics[scale=0.4,page=1]{../plots/merge_plot_Co-rank_1000000_2000000}
+\includegraphics[scale=0.4,page=1]{../plots/merge_plot_Co-rank_10000000_20000000}
+\includegraphics[scale=0.4,page=1]{../plots/merge_plot_Co-rank_100000000_200000000}
+\\
+\\
+This parallel merging algorithm performs a lot better than the last, with absolute speed-ups ranging between 10-20 for 32 processors. Even though n+m >> p, the absolute speed-up line is not linear (algorithm is not strongly scaling), which makes sense, as the amount of processors corresponds to t in the runtime-complexity formula ($O(n + m + t \cdot \log(n+m))$).
+
 \answer{4}
-Currently in the program there is an implicit barrier required after calculating the co-ranks:\\
+Currently in the program there is an implicit barrier (synchronization) required after calculating the co-ranks, as each thread needs the co-ranks at index i and i + 1 (i=omp\_get\_thread\_num):\\
   \begin{minipage}[t]{1.0\linewidth}
 \begin{lstlisting}
   #pragma omp for SCHEDULE_STRATEGY
@@ -457,14 +466,15 @@ If we calculate the co-ranks twice per block as follows we can get rid of this s
   \begin{minipage}[t]{1.0\linewidth}
 \begin{lstlisting}
   if(omp_get_thread_num != t-1){
-    corank(omp_get_thread_num * (n + m) / t, A, n, &coj[i], B, m, &cok[i]);
-    corank((omp_get_thread_num + 1) * (n + m) / t, A, n, &coj[i], B, m, &cok[i]);
+    corank(omp_get_thread_num() * (n + m) / t, A, n, &coj[i], B, m, &cok[i]);
+    corank((omp_get_thread_num() + 1) * (n + m) / t, A, n, &coj[i], B, m, &cok[i]);
   }
   seq_merge1(&A[coj[i]], coj[omp_get_thread_num + 1] - coj[omp_get_thread_num], 
   &B[cok[i]], cok[omp_get_thread_num + 1] - cok[omp_get_thread_num], 
   &C[omp_get_thread_num * (n + m) / t]);
   \end{lstlisting}
 \end{minipage}
+This way there are around twice as many co-rank operations performed, however, no synchronization is necessary.
 
 \exercise{7}
 
@@ -494,8 +504,8 @@ void merge_divconq(double A[], int n, double B[], int m, double C[])
 \answer{1}
 Code can be found in \textit{merge3.c}
 \answer{2}
-Testing empirically showed that a very good cut-off value can be calculated with the following function $cutoff(n,m,t) = \frac{n \cdot m}{t}$.
-where n and m are the lengths of the arrays A and B before performing any recursion steps
+The CUTOFF should not be too small, to minimize the recursion overhead. It should also be chosen small enough, that processors do not have high idle times. To achieve this the CUTOFF should be directly proportional to $m+n$ and indirectly proportional to $p$. Testing empirically showed that CUTOFF=$ x\cdot \frac{n \cdot m}{t}$ for x < 5 (where n and m are the lengths of the arrays A and B before performing any recursion steps) had the fastest runtimes.
+
 
 \answer{3}
 \includegraphics[scale=0.4,page=1]{../plots/merge_plot_Divide-and-Conquer_1000000_2000000}
@@ -503,7 +513,7 @@ where n and m are the lengths of the arrays A and B before performing any recurs
 \includegraphics[scale=0.4,page=1]{../plots/merge_plot_Divide-and-Conquer_100000000_200000000}
 \\
 \\
-In the first plot we can see that the speed up monotonically increases up to using 16 processors, but then the overhead gets to large and the speed up starts to decrease. On the other two plots with larger problem instances this behavior is not observed.
+In the first plot we can see that the speed up monotonically increases up to using 16 processors, but then dips for 32 processors, which is likely due to the extra overhead that comes with more processors. On the other two plots with larger problem instances this behavior is not observed for $p \leq 32$.
 \exercise{8}
 
 \answer{1}
