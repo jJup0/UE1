@@ -5,6 +5,7 @@
  * MPI_INIT must have taken place before the call of mv, and each process has to call it.
  * @details The partition, which process takes care of which part of the matrix has to be done in before.
  * The information about that is passed in the arguments.
+ * Each process receives a part of complete rows of the original matrix and a part of the original vector.
  **/
 
 #include <assert.h>
@@ -14,18 +15,6 @@
 #include <stdlib.h>
 
 #include "mv.h"
-
-/*
- A: Pointer to the input matrix (only the Submatrix the process has access to)
- nrows: number of rows of A
- ncols: number of columns of A
- nrows_a_loc: how many rows the current process received
- ncols_a_loc: how many columns (per row) the current process received (=ncols)
- x: Pointer to the columns of the input vector (where the process starts)
- ncols_x_loc: how many entries of the input vector the process receives
- b: pointer to the parts of the result vector the process writes on
- nrows_b_loc: how many entries of b the process writes on
-*/
 
 /**
  * @brief This function performs a matrix-vector multiplication.
