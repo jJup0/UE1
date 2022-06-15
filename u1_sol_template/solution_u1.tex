@@ -366,12 +366,12 @@ while (j<m) C[k++] = B[j++];
 \answer{1}
 Assuming i, j, k are in registers. \\
 Example for a best case input for A and B:
-A = [0,0,0,0 ...] 
-B = [1,1,1,1 ...] \\
-This way A[0] will be fetched with a cache miss, then B[0] will be fetched with a cache miss (stored in a register afterwards), overwriting the cache line with A[0] stored. Then A[0] will be inserted at C[0].
-Then A[1] will be fetched, resulting in a cache miss, however the rest of A will be fetched and inserted into C, resulting in a cache miss every 16 elements. \\
-Then all of B will be inserted into C, also resulting in a cache miss every 16 elements. \\
-Total cache misses: 2 + 2n/16 = 2 + n/8, \textbf{cache miss rate:} 1/16
+A = [1,1,1,1 ...] 
+B = [0,0,0,0 ...] \\
+This way A[0] will be fetched with a cache miss, then B[0] will be fetched with a cache miss (stored in a register afterwards), overwriting the cache line with A[0] stored. Then B[0] will be inserted at C[0].
+Then B[1] will be fetched, resulting in a cache hit, because all elemebts from B[0] to B[15] have been stored to the cache. Due to the block size of 16, a cache miss will occur after 15 subsequent hits. \\
+After each element of B has been written C, all elements of A will be inserted into C, also resulting in a cache miss every 16 elements. \\
+Total cache misses: 2 + 2n/16 = 2 + n/8, \textbf{cache miss rate:} 1/16.
 
 \answer{2}
 Example for a worst case input for A and B:
