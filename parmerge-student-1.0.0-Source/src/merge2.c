@@ -44,7 +44,7 @@ void corank(int i, double A[], long n, int* corank_a, double B[], long m, int* c
     int j = min(i, n);
     int k = i - j;  // Because j + k = i
     int j_low = max(0, i - m);
-    int k_low;
+    int k_low = 0;  // uninit in pseudo code
     int delta;
 
     while (1) {
