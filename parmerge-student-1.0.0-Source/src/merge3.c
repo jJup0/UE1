@@ -1,9 +1,23 @@
+/**
+ * @file merge3.c
+ * @author Elias Pinter <12023962>, Kurdo-Jaroslav Asinger <01300351>, Jakob Roithinger <52009269> 
+ * @brief Program merge3: This program takes a sorted array a with length n, a sorted array b with length and an array c with length n+m as input
+ * and then merges the two arrays a and b into the array c by coranking.
+ * @details The array C is partitioned into blocks of size (n+m)/t where t is the number of active threads. All coranks
+ * for start and end of each block are computed in parallel. The coranking is performed sequentially in a bninary search like fashion. 
+ **/
+
 #include <omp.h>
 #include <stdio.h>
 #include <stdlib.h>
-
 #include "merge.h"
 
+/**
+ * @brief This function returns the rank of an element val in the array arr with length n.
+ * @param val element that is being ranked
+ * @param arr array that is being ranked into
+ * @param n length of the array arr
+ */
 int rank(double val, double arr[], int n) {
     int lo = 0;
     int hi = n - 1;
