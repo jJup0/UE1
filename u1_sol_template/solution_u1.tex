@@ -155,7 +155,7 @@ void mv(int m, int n, double M[m][n], double V[n], double W[m]){
     C[0][j] = V[j];
   }
 
-  // making m copies of V in O(log(n)) time steps
+  // making m copies of V in O(log(m)) time steps
   offset = 1;
   // O(log(n)) loops
   while(offset < m){
