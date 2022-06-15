@@ -22,11 +22,11 @@
  * @param nrows the number of rows of the original matrix (not A)
  * @param ncols the number of columns of the original matrix (not A)
  * @param nrows_a_loc the number of rows this processor has to process the multiplication with
- * @param ncols_a_loc the number of columns this processor has to process the multiplication with (==ncols here)
- * @param x pointer to a part of the original vector which is to be multiplied with the original matrix
- * @param nrows_x_loc the number of rows of the original vector designated to the processor (length of x)
- * @param b pointer to a part of the result vector b
- * @param ncols_b_loc the number of rows of b which was designated to this processor (length of b, equal to nrows_a_loc)
+ * @param ncols_a_loc the number of columns this processor has to process the multiplication with (unnecessary here)
+ * @param x pointer to a part of the original vector which is multiplied to the original matrix
+ * @param nrows_x_loc the number of rows of the original vector whiswere designated to the processor
+ * @param b pointer to the result vector b
+ * @param ncols_b_loc the number of rows of b which was designated to this processor (unnecessary here)
  */
 void mv(base_t **A, int nrows, int ncols, int nrows_a_loc, int ncols_a_loc, base_t *x, int nrows_x_loc, base_t *b, int ncols_b_loc) {
     int rank, size;
@@ -37,13 +37,10 @@ void mv(base_t **A, int nrows, int ncols, int nrows_a_loc, int ncols_a_loc, base
     int *recvcounts = (int *)malloc(size * sizeof(int));
     int *displs = (int *)malloc(size * sizeof(int));
 
-    MPI_Allgather(&nrows_x_loc, 1, MPI_INT, recvcounts, 1, MPI_INT, MPI_COMM_WORLD);
+    displs[0] = 0;
+    MPI_Exscan(&nrows_x_loc, &displs[rank], 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
 
-    int curr_displ = 0;
-    for (int i = 0; i < size; i++) {
-        displs[i] = curr_displ;
-        curr_displ += recvcounts[i];
-    }
+    MPI_Allgather(&nrows_x_loc, 1, MPI_INT, recvcounts, 1, MPI_INT, MPI_COMM_WORLD);
 
     MPI_Allgather(&displs[rank], 1, MPI_INT, displs, 1, MPI_INT, MPI_COMM_WORLD);
 
