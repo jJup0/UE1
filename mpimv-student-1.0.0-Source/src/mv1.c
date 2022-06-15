@@ -5,25 +5,6 @@
 #include <stdlib.h>
 
 #include "mv.h"
-#include "utils.h"
-
-void printIntArray(int *array, int n, int rank) {
-    fprintf(stderr, "Rank = %d  ", rank);
-    fprintf(stderr, "[%d", array[0]);
-    for (int i = 1; i < n; i++) {
-        fprintf(stderr, ", %d", array[i]);
-    }
-    fprintf(stderr, "]\n");
-}
-
-void printDoubleArray(double *array, int n, int rank) {
-    fprintf(stderr, "Rank = %d  ", rank);
-    fprintf(stderr, "[%.0f", array[0]);
-    for (int i = 1; i < n; i++) {
-        fprintf(stderr, ", %.0f", array[i]);
-    }
-    fprintf(stderr, "]\n");
-}
 
 /*
  A: Pointer to the input matrix (only the Submatrix the process has access to)
@@ -38,19 +19,17 @@ void printDoubleArray(double *array, int n, int rank) {
 */
 
 /*
-(n*m/p) + m + p
+(n*m/p) + n + p
 */
 void mv(base_t **A, int nrows, int ncols, int nrows_a_loc, int ncols_a_loc, base_t *x, int nrows_x_loc, base_t *b, int ncols_b_loc) {
     int rank, size;
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    base_t *completeX;
-    base_t *recvcounts;
-    base_t *displs;
-    alloc_vector(&completeX, nrows);
-    alloc_vector(&recvcounts, size);
-    alloc_vector(&displs, size);
+    base_t *completeX = (base_t *)malloc(nrows * sizeof(base_t));
+    int *recvcounts = (int *)malloc(size * sizeof(int));
+    int *displs = (int *)malloc(size * sizeof(int));
+
     displs[0] = 0;
     // p + log(p)
     MPI_Exscan(&nrows_x_loc, &displs[rank], 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
@@ -61,7 +40,7 @@ void mv(base_t **A, int nrows, int ncols, int nrows_a_loc, int ncols_a_loc, base
     // p + log(p)
     MPI_Allgather(&displs[rank], 1, MPI_INT, displs, 1, MPI_INT, MPI_COMM_WORLD);
 
-    // m + log(p)
+    // n + log(p)
     MPI_Allgatherv(x, nrows_x_loc, MPI_DOUBLE, completeX, recvcounts, displs, MPI_DOUBLE, MPI_COMM_WORLD);
 
     // m*n/p
@@ -71,7 +50,7 @@ void mv(base_t **A, int nrows, int ncols, int nrows_a_loc, int ncols_a_loc, base
             b[i] += A[i][j] * completeX[j];
         }
     }
-    free_vector(completeX);
-    free_vector(recvcounts);
-    free_vector(displs);
+    free(completeX);
+    free(recvcounts);
+    free(displs);
 }

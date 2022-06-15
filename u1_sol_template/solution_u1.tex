@@ -16,6 +16,7 @@ headings=normal,
 \usepackage{booktabs}
 \usepackage{listings}
 
+\usepackage{pdfpages}
 \usepackage{graphicx}
 \graphicspath{ {../plots/} }
 
@@ -31,6 +32,7 @@ headings=normal,
 
 \newcommand\plotwidth{0.8\textwidth}
 \newcommand\plotheight{0.48\textwidth}
+
 
 \begin{document}
 
@@ -75,8 +77,7 @@ TU Wien}
 
 \exercise{1}
 
-The source code snippets are just given here in case you would like to reuse them.
-You can remove them in your solution if you want.
+\begin{minipage}[t]{1.0\linewidth}
 \begin{lstlisting}
 void mv(int m, int n, double M[m][n], double V[n], double W[m])
 {
@@ -90,8 +91,10 @@ void mv(int m, int n, double M[m][n], double V[n], double W[m])
   }
 }
 \end{lstlisting}
+\end{minipage}
 
 \answer{1}
+\begin{minipage}[t]{1.0\linewidth}
 \begin{lstlisting}
 void mv(int m, int n, double M[m][n], double V[n], double W[m]){
   par(0<=i<m){
@@ -103,9 +106,11 @@ void mv(int m, int n, double M[m][n], double V[n], double W[m]){
   }
 }
 \end{lstlisting}
-requires the CREW PRAM model
-\newpage
+\end{minipage}
+Requires the CREW PRAM model (concurrent read on V - no concurrent writes).
+
 \answer{2}
+\begin{minipage}[t]{1.0\linewidth}
 \begin{lstlisting}
 void mv(int m, int n, double M[m][n], double V[n], double W[m]) {
   
@@ -137,9 +142,11 @@ void mv(int m, int n, double M[m][n], double V[n], double W[m]) {
   }
 }
 \end{lstlisting}
-requires the CREW PRAM model
-\newpage
+\end{minipage}
+Requires the CREW PRAM model (concurrent read on V - no concurrent writes).
+
 \answer{3}
+\begin{minipage}[t]{1.0\linewidth}
 \begin{lstlisting}
 void mv(int m, int n, double M[m][n], double V[n], double W[m]){
   double C[m][n];
@@ -153,6 +160,7 @@ void mv(int m, int n, double M[m][n], double V[n], double W[m]){
   // O(log(n)) loops
   while(offset < m){
     // duplicating existing vectors in O(1)
+    // offset, m private for each thread i.e in OpenMP firstprivate(offset, m)
     par(0<=i<m){
       if(i + offset < m){
         par(0<=j<n){
@@ -174,6 +182,7 @@ void mv(int m, int n, double M[m][n], double V[n], double W[m]){
     // sum row [i] of Matrix in O(log(n)) time steps
     while(offset < n){
       // EREW summing, actually only n/betweenGap processors needed
+      // offset, n private for each thread i.e in OpenMP firstprivate(offset, n)
       par(0<=j<n) {
         if(offset + j * betweenGap < n){
           M[i][j * betweenGap] += M[i][offset + j * betweenGap];
@@ -190,10 +199,12 @@ void mv(int m, int n, double M[m][n], double V[n], double W[m]){
   }
 }
 \end{lstlisting}
-requires the EREW PRAM model
+\end{minipage}
+Requires the EREW PRAM model (no concurrent reads or writes).
 
 \exercise{2}
 
+\begin{minipage}[t]{1.0\linewidth}
 \begin{lstlisting}
 for (i=0; i<n; i++) {
   int count = 0;
@@ -208,6 +219,7 @@ for (i=0; i<n; i++) {
 }
 for (i=0; i<n; i++) a[i] = b[i];
 \end{lstlisting}
+\end{minipage}
 
 \answer{1}
 The program sorts a given array of integers in ascending order. A comparison with "$a \leq \ b$" has to be done in for all b that come before a, so that the program also sorts array with duplicates. If $\leq$ is not used for all b that come before a, all duplicates will end up at the same index in the result, causing ``gaps'' (some array entries will have undefined/default initialization value). Using $\leq$ also guarantees stability, meaning that the relative order of equal elements in the input will be sustained in the output.
@@ -217,6 +229,7 @@ The asymptotic sequential work of the given algorithm is $O(n^{2})$. The outer l
 
 % TODO REVIEW dependent on i is not canonical though?
 % TODO REVIEW not necessary?
+\begin{minipage}[t]{1.0\linewidth}
 \begin{lstlisting}
 for (i=0; i<n; i++) {            // canonical loop dependent on n
   int count = 0;                 // constant work
@@ -232,12 +245,14 @@ for (i=0; i<n; i++) {            // canonical loop dependent on n
 for (i=0; i<n; i++)              // canonical loop dependent on n
   a[i] = b[i];                   // constant work
 \end{lstlisting}
+\end{minipage}
 \noindent
-\begin{math}n \cdot (1 + n \cdot 1 + 1 + n \cdot 1 + 1) + n \cdot 1 = n \cdot (n + 3) + n = n^2 + 4n\end{math}\\
+\begin{math}n \cdot (1 + i \cdot 1 + 1 + (n-i) \cdot 1 + 1) + n \cdot 1 = n \cdot (n + 3) + n = n^2 + 4n\end{math}\\
 \begin{math}n^2 + 4n \in O(n^2)\end{math}\\
 This is a very simplified calculation. The j-loop's workload rises as the i-loop's workload shrinks. Generally, within one outer-loop iteration, the sum of the iterations of the first and second j-loop together is n. However, it does not make in difference for the big O notation.
 
 \answer{3}
+\begin{minipage}[t]{1.0\linewidth}
 \begin{lstlisting}
 #include <omp.h>
 // assume a, b initialized arrays, each with a capacity of n integers
@@ -264,6 +279,7 @@ This is a very simplified calculation. The j-loop's workload rises as the i-loop
  }
 }
 \end{lstlisting}
+\end{minipage}
 
 \answer{4}
 The outer loop is embarrassingly parallel, because the iterations are independent of each other. Therefore, the speedup is linear (compared to the sequential execution of this algorithm). So assuming $n \geq p$ the runtime will be in:\\
@@ -280,6 +296,7 @@ The absolute speedup has to be compared with the best known sequantial algorithm
 
 
 \exercise{3}
+\begin{minipage}[t]{1.0\linewidth}
 \begin{lstlisting}
 # pragma omp parallel for schedule ( runtime )
 for (i = 0; i < n ; i++) {
@@ -287,6 +304,7 @@ for (i = 0; i < n ; i++) {
   t[omp_get_thread_num()]++;
 }
 \end{lstlisting}
+\end{minipage}
 \answer{1}
 a[i] tracks which thread executed iteration \emph{i} in the for loop.
 t[i] tracks how many iterations were executed by thread \emph{i}.
@@ -298,13 +316,13 @@ t[i] tracks how many iterations were executed by thread \emph{i}.
   \toprule
  case /  $i$ & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 & 13 & 14 & 15 & 16 & 17 & 18  \\
   \midrule
-\texttt{static}     & 0 & 0 & 0 & 1 & 1 & 1 & 2 & 2 & 2 & 3 & 3 & 3 & 4 & 4 & 4 & 5 & 5 & 5 & 0 \\
+\texttt{static}     & 0 & 0 & 0 & 0 & 1 & 1 & 1 & 2 & 2 & 2 & 3 & 3 & 3 & 4 & 4 & 4 & 5 & 5 & 5 \\
 \texttt{static,2}   & 0 & 0 & 1 & 1 & 2 & 2 & 3 & 3 & 4 & 4 & 5 & 5 & 0 & 0 & 1 & 1 & 2 & 2 & 3 \\
 \texttt{static,5}   & 0 & 0 & 0 & 0 & 0 & 1 & 1 & 1 & 1 & 1 & 2 & 2 & 2 & 2 & 2 & 3 & 3 & 3 & 3 \\
 \texttt{static,6}   & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 1 & 1 & 1 & 1 & 1 & 2 & 2 & 2 & 2 & 2 & 2 & 3 \\ 
-\texttt{dynamic,1}  & 0 & 1 & 2 & 3 & 4 & 5 & 0 & 1 & 2 & 3 & 4 & 5 & 0 & 1 & 2 & 3 & 4 & 5 & 0 \\
-\texttt{dynamic,2}  & 0 & 0 & 1 & 1 & 2 & 2 & 3 & 3 & 4 & 4 & 5 & 5 & 0 & 0 & 1 & 1 & 2 & 2 & 3 \\
-  \texttt{guided,3} & 0 & 0 & 0 & 1 & 1 & 1 & 2 & 2 & 2 & 3 & 3 & 3 & 4 & 4 & 4 & 5 & 5 & 5 & 0 \\
+\texttt{dynamic,1}  & 0 & 2 & 5 & 0 & 0 & 0 & 2 & 1 & 5 & 4 & 2 & 3 & 5 & 1 & 0 & 2 & 4 & 5 & 3 \\
+\texttt{dynamic,2}  & 0 & 0 & 4 & 4 & 1 & 1 & 3 & 3 & 5 & 5 & 2 & 2 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+  \texttt{guided,3} & 0 & 0 & 0 & 0 & 4 & 4 & 4 & 1 & 1 & 1 & 0 & 0 & 0 & 5 & 5 & 5 & 4 & 4 & 4 \\
   \bottomrule
 \end{tabular}\\
 
@@ -316,9 +334,9 @@ case / $t$             & $t[0]$ & $t[1]$ & $t[2]$ & $t[3]$ & $t[4]$ & $t[5]$ \\
 \texttt{static,2}  & 4 & 4 & 4 & 3 & 2 & 2 \\
 \texttt{static,5}  & 5 & 5 & 5 & 4 & 0 & 0 \\
 \texttt{static,6}  & 6 & 6 & 6 & 1 & 0 & 0 \\
-\texttt{dynamic,1} & 4 & 3 & 3 & 3 & 3 & 3 \\
-\texttt{dynamic,2} & 4 & 4 & 4 & 3 & 2 & 2 \\
-\texttt{guided,3}  & 4 & 3 & 3 & 3 & 3 & 3 \\
+\texttt{dynamic,1} & 5 & 2 & 4 & 2 & 2 & 4 \\
+\texttt{dynamic,2} & 9 & 2 & 2 & 2 & 2 & 2 \\
+\texttt{guided,3}  & 7 & 3 & 0 & 0 & 6 & 3 \\
     \bottomrule
 \end{tabular}
 
@@ -326,8 +344,10 @@ case / $t$             & $t[0]$ & $t[1]$ & $t[2]$ & $t[3]$ & $t[4]$ & $t[5]$ \\
 False sharing is a possible performance issue:
 Multiple threads (on different cores) may want to access t (at different indexes i and j) at close points in time. If two indexes i, j are close enough and positioned in a way that t[i] and t[j] are on the same cache line, and t[i] t[j] are accessed by different threads, they will be ``falsely shared'' and cache coherency activity will occur, which impacts performance considerably. 
 
+
 \exercise{4}
 
+\begin{minipage}[t]{1.0\linewidth}
 \begin{lstlisting}
 i = 0; j = 0; k = 0; 
 while (i<n&&j<m) {
@@ -336,6 +356,7 @@ while (i<n&&j<m) {
 while (i<n) C[k++] = A[i++]; 
 while (j<m) C[k++] = B[j++];
 \end{lstlisting}
+\end{minipage}
 
 \answer{1}
 Assuming i, j, k are in registers. \\
@@ -357,30 +378,33 @@ Total cache misses: 2n, \textbf{cache miss rate:} 1.0
 \exercise{5}
 
 \answer{1}
-A parallel section is opened, with to omp for constructs. In the first for-construct every element in \emph{A} is ranked in the array \emph{B} and inserted accordingly in \emph{C}. It is marked as no wait, as there are no data conflicts. In the second for-construct every element in \emph{B} is ranked in the array \emph{A} and then inserted accordingly in \emph{C}. Ranking is done sequentially by binary search in O(log(n)), inserting into \emph{C} is done for n + m elements in parallel, in O(1) time. Therefore the runtime is $ O((n + m)/p \cdot log(n))$.
+A parallel section is opened, with to omp for constructs. In the first for-construct every element in \emph{A} is ranked in the array \emph{B} and inserted accordingly in \emph{C}. It is marked as no wait, as there are no data conflicts. In the second for-construct every element in \emph{B} is ranked in the array \emph{A} and then inserted accordingly in \emph{C}. Ranking is done sequentially by binary search in O(log(n)), inserting into \emph{C} is done for n + m elements in parallel, in O(1) time. Therefore the runtime is $ O\left(\frac{n}{p} \cdot \log(m) \right) + O\left(\frac{m}{p} \cdot \log(n)\right) = 
+O\left(\frac{n \cdot \log(m) + m \cdot \log(n)}{p}\right)$.
+\\
+\\
+Code can be found in \textit{merge1.c}
 
 
 \answer{2}
+\includegraphics[scale=0.4,page=1]{../plots/merge_plot_Rank-each-element_1000000_2000000}
+\includegraphics[scale=0.4,page=1]{../plots/merge_plot_Rank-each-element_10000000_20000000} \\
+\includegraphics[scale=0.4,page=1]{../plots/merge_plot_Rank-each-element_100000000_200000000} \\
 
-% TODO make look nice, use speed up
-
-\includegraphics[width=\plotwidth, height=\plotheight]{merge_plot_Rank-each-Element_1000000_2000000.png}\\
-\includegraphics[width=\plotwidth, height=\plotheight]{merge_plot_Rank-each-Element_10000000_20000000.png}\\
-\includegraphics[width=\plotwidth, height=\plotheight]{merge_plot_Rank-each-Element_100000000_200000000.png}\\
-
-
+% TODO review "discussion"
+\noindent
+Looking at the benchmark plots, a very definitive linear absolute speed-up can be recognized for all 3 input sizes. However even for 32 processors, it only lies around 0.6 (parallelization does not make sense for absolute speed up < 1). The graphs for the different input sizes look identical, only the y-axis scales for average times differ by factors of 10, which makes sense as the input sizes differ by factors of 10.
 
 \answer{3}
 To make the merge stable, nothing has to be done to preserve relative order of equal elements in A as well as B in C.
 To make sure equal elements of A come before equal elements of B: \\
 Rewrite rank algorithm:\\
-rank{\_}for{\_}A(a, B, m) returns a j such that B[j] < a <= B[j + 1] \\
+rank{\_}for{\_}A(a, B, m) returns a j such that $B[j] < a \leq B[j + 1]$ \\
 and another algorithm: \\
-rank{\_}for{\_}B(b, A, n) returns an i such that A[i] <= b < A[i + 1]
+rank{\_}for{\_}B(b, A, n) returns an i such that $A[i] \leq b < A[i + 1]$
 
-
+\newpage
 \exercise{6}
-
+\begin{minipage}[t]{1.0\linewidth}
 \begin{lstlisting}
 void merge_corank(double A[], int n, double B[], int m, double C[])
 {
@@ -403,25 +427,32 @@ void merge_corank(double A[], int n, double B[], int m, double C[])
   }
 }
 \end{lstlisting}
+\end{minipage}
 
 \answer{1}
 The asymptotic complexity can be calculated as follows:\\
 \\
-$O(t \cdot log(n+m) + t \cdot \frac{n+m}{t}) = O(n + m + t \cdot log(n+m))$
-\answer{2}
+$O\left(t \cdot \log(n+m) + t \cdot \frac{n+m}{t} \right) = O(n + m + t \cdot \log(n+m)) = T_{seq}(n,m)$
+\\
+\\
+To compare this to the sequential complexity $t=1$ should be chosen  
 
+\answer{2}
+Code can be found in \textit{merge2.c}
 \answer{3}
-\newpage
 \answer{4}
 Currently in the program there is an implicit barrier required after calculating the co-ranks:\\
-  \begin{lstlisting}
+  \begin{minipage}[t]{1.0\linewidth}
+\begin{lstlisting}
   #pragma omp for SCHEDULE_STRATEGY
   for (i = 0; i < t; i++) {
       corank(i * (n + m) / t, A, n, &coj[i], B, m, &cok[i]);
   }
   \end{lstlisting}
-If we calculate the co-ranks twicr per block as follows we can get rid of this synchronisation:
-  \begin{lstlisting}
+\end{minipage}
+If we calculate the co-ranks twice per block as follows we can get rid of this synchronization:
+  \begin{minipage}[t]{1.0\linewidth}
+\begin{lstlisting}
   if(omp_get_thread_num != t-1){
     corank(omp_get_thread_num * (n + m) / t, A, n, &coj[i], B, m, &cok[i]);
     corank((omp_get_thread_num + 1) * (n + m) / t, A, n, &coj[i], B, m, &cok[i]);
@@ -430,9 +461,11 @@ If we calculate the co-ranks twicr per block as follows we can get rid of this s
   &B[cok[i]], cok[omp_get_thread_num + 1] - cok[omp_get_thread_num], 
   &C[omp_get_thread_num * (n + m) / t]);
   \end{lstlisting}
+\end{minipage}
 
 \exercise{7}
 
+\begin{minipage}[t]{1.0\linewidth}
 \begin{lstlisting}
 void merge_divconq(double A[], int n, double B[], int m, double C[])
 {
@@ -453,49 +486,86 @@ void merge_divconq(double A[], int n, double B[], int m, double C[])
   }
 }
 \end{lstlisting}
+\end{minipage}
 
 \answer{1}
-
+Code can be found in \textit{merge3.c}
 \answer{2}
 Testing empirically showed that a very good cut-off value can be calculated with the following function $cutoff(n,m,t) = \frac{n \cdot m}{t}$.
 where n and m are the lengths of the arrays A and B before performing any recursion steps
 
 \answer{3}
+\includegraphics[scale=0.4,page=1]{../plots/merge_plot_Divide-and-Conquer_1000000_2000000}
+\includegraphics[scale=0.4,page=1]{../plots/merge_plot_Divide-and-Conquer_10000000_20000000}
+\includegraphics[scale=0.4,page=1]{../plots/merge_plot_Divide-and-Conquer_100000000_200000000}
+\\
+\\
+In the first plot we can see that the speed up monotonically increases up to using 16 processors, but then the overhead gets to large and the speed up starts to decrease. On the other two plots with larger problem instances this behavior is not observed.
 \exercise{8}
 
 \answer{1}
+Code can be found in \textit{mv1.c}
 
 \answer{2}
-We would expect the algorithm to have a linear relaitive speedup, due to a good load balance on the processes - as long as $p \leq\ n$  (rows of the matrix $A$). Generating the sub-input is manageable in $O(\frac{m \cdot n}{p})$ The complexity of the multiplication one process has to calculate is in $\frac{m \cdot n}{p}$. The complexities of all MPI-functions must be added. MPI\_Allgather,  MPI\_Allgatherv and MPI\_Exscan run in $O(n + log(p))$. As for Allgatherv, the input size is dependent on m (number of columns in matrix $A$), so $(m + log(p))$ has to be added. As for the other calls, the input size is dependent on $p$, so $(p + log(p))$ has to be added as well. After simplification, the complexity should be $O(\frac{m \cdot n}{p} + m + p)$.\\
-The best known sequential algorithm vor matrix-vector multiplication runs in $O(m \cdot n)$. However, if we do not use more processes than input lines $n$, both $m$ and $p$ will be dominated by $\frac{m \cdot n}{p}$.\\
-\begin{math}S_{p}(n)=\frac{T_{seq}(n)}{T_{par}(p,n)} = \frac{m \cdot n}{(m \cdot n)/p } = p \end{math} (if $p \leq\ n$)\\
-In worst case, the speedup is not linear anymore:\\
-\begin{math}S_{p}(n)=\frac{T_{seq}(n)}{T_{par}(p,n)} = \frac{m \cdot n}{m \cdot n/p + m + p} = \frac{m \cdot n \cdot p}{m \cdot n + p \cdot  m + p^2} = \frac{p}{1 + p/n + p^2/(m \cdot n)} = \frac{n \cdot p}{n + p + p^2/m}\end{math}\\
-In not too many processes are used (as stated above), then the parallel efficiency would be 1:\\
-\begin{math}E_{p}(n)=\frac{T_{seq}(n)}{pT_{par}(p,n)} = \frac{m \cdot n}{p \cdot (m \cdot n)/p} = 1 \end{math}\\
-If too many $p$ will be used, the errifiency will turn into:\\
-\begin{math}E_{p}(n)=\frac{T_{seq}(n)}{pT_{par}(p,n)} = \frac{1}{1 + p/n + p^2/(m \cdot n)} \end{math}\\
+We would expect the algorithm to have a linear relaitive speedup, due to a good load balance on the processes - as long as $p \leq m$  (rows of the matrix $A$). Generating the sub-input is manageable in $O\left(\frac{m \cdot n}{p}\right)$ if the contents have to be read and re-written. If it is just generated by using pointer-arithmetics, then  it can be even done in $O\left(1\right)$. The complexity of the multiplication one process has to calculate is in $\frac{m \cdot n}{p}$. The complexities of all MPI-functions must be added. MPI\_Allgather,  MPI\_Allgatherv and MPI\_Exscan run in $O(n + \log(p))$. As for Allgatherv, the input size is dependent on n (number of columns in matrix $A$), so $(n + log(p))$ has to be added. As for the other calls, the input size is dependent on $p$, so $(p + log(p))$ has to be added as well. After simplification, the complexity should be $O\left(\frac{m \cdot n}{p} + n + p\right)$.\\
+
+\noindent The best known sequential algorithm vor matrix-vector multiplication runs in $O(m \cdot n)$. However, if we do not use more processes than input lines $m$, both $n$ and $p$ will be dominated by $\frac{m \cdot n}{p}$.
+\\[0.5 em]
+$S_{p}(n)=\frac{T_{seq}(n)}{T_{par}(p,n)} = \frac{m \cdot n}{(m \cdot n)/p } = p$ (if $p \leq\ m$)
+\\[0.5 em]
+In worst case, the speedup is not linear anymore:
+\\[0.5 em]
+$\displaystyle S_{p}(n)=\frac{T_{seq}(n)}{T_{par}(p,n)} = \frac{m \cdot n}{n \cdot m/p + n + p} = \frac{m \cdot n \cdot p}{m \cdot n + p \cdot  n + p^2} = \frac{p}{1 + p/m + p^2/(m \cdot n)} = \frac{m \cdot p}{m + p + p^2/n}$
+\\[0.5 em]
+In not too many processes are used (as stated above), then the parallel efficiency would be 1:
+\\[0.5 em]
+$\displaystyle E_{p}(n)=\frac{T_{seq}(n)}{pT_{par}(p,n)} = \frac{m \cdot n}{p \cdot (m \cdot n)/p} = 1$
+\\[0.5 em]
+If too many $p$ will be used, the errifiency will turn into:
+\\[0.5 em]
+$\displaystyle E_{p}(n)=\frac{T_{seq}(n)}{pT_{par}(p,n)} = \frac{1}{1 + p/m + p^2/(m \cdot n)}$
+\\[0.5 em]
 As we can see, the efficiency will drop further the more we increase $p$.
+
+
 \answer{3}
-insert plots here
+\includegraphics[scale=0.4,page=1]{../plots/matrix_vector_plot_Row-wise-distribution_300} 
+\includegraphics[scale=0.4,page=1]{../plots/matrix_vector_plot_Row-wise-distribution_600} \\
+\includegraphics[scale=0.4,page=1]{../plots/matrix_vector_plot_Row-wise-distribution_1200} 
+\includegraphics[scale=0.4,page=1]{../plots/matrix_vector_plot_Row-wise-distribution_12000} \\
+
+For smaller input sizes ($\leq$1200) the average time increases with increased processor count. Respectively the absolute speed up decreases. This can be explained by the fact that the communication required to distribute the vector dominates the time saved by parallelizing the matrix-vector multiplication. For example for n=300, p=256 each processor only receives 1-2 rows, and so only has to do 2 * n (=600) multiplications and additions. For n=12,000 the absolute speed-up is monotonically increasing with increasing processors (at least until p=256). Here each processor has to do around 45 * n (=540,000) multiplications and additions.
 
 \exercise{9}
 
 \answer{1}
-
+Code can be found in \textit{mv2.c}
 \answer{2}
-We would expect the algorithm to have a linear relaitive speedup, due to a good load balance on the processes - as long as $p \leq\ m$  (columns of the matrix $A$). Generating the sub-input is manageable in $O(\frac{m \cdot n}{p})$. The complexity of the multiplication one process has to calculate is in $\frac{m \cdot n}{p}$. The complexities of all MPI-functions must be added. MPI\_Allgather,  MPI\_Reduce\_scatter run in $O(n + log(p))$. As for Reduce\_scatter, the input size is dependent on n (number of rows in matrix $A$), so $(n + log(p))$ has to be added. As for Allgather, the input size is dependent on $p$, so $(p + log(p))$ has to be added as well. After simplification, the complexity should be $O(\frac{m \cdot n}{p} + n + p)$.\\
-\newpage
-\noindent The best known sequential algorithm vor matrix-vector multiplication runs in $O(m \cdot n)$. However, if we do not use more processes than input lines $n$, both $m$ and $p$ will be dominated by $\frac{m \cdot n}{p}$.\\
-\begin{math}S_{p}(n)=\frac{T_{seq}(n)}{T_{par}(p,n)} = \frac{m \cdot n}{(m \cdot n)/p } = p \end{math} (if $p \leq\ m$)\\
-In worst case, the speedup is not linear anymore:\\
-\begin{math}S_{p}(n)=\frac{T_{seq}(n)}{T_{par}(p,n)} = \frac{m \cdot n}{m \cdot n/p + n + p} = \frac{m \cdot n \cdot p}{m \cdot n + p \cdot  n + p^2} = \frac{p}{1 + p/m + p^2/(m \cdot n)} = \frac{m \cdot p}{m + p + p^2/n}\end{math}\\
-In not too many processes are used (as stated above), then the parallel efficiency would be 1:\\
-\begin{math}E_{p}(n)=\frac{T_{seq}(n)}{pT_{par}(p,n)} = \frac{m \cdot n}{p \cdot (m \cdot n)/p} = 1 \end{math}\\
-If too many $p$ will be used, the errifiency will turn into:\\
-\begin{math}E_{p}(n)=\frac{T_{seq}(n)}{pT_{par}(p,n)} = \frac{1}{1 + p/n + p^2/(m \cdot n)} \end{math}\\
-As we can see, the efficiency will drop further the more we increase $p$.
-\answer{3}
+We would expect the algorithm to have a linear relaitive speedup, due to a good load balance on the processes - as long as $p \leq\ n$  (columns of the matrix $A$). Generating the sub-input is manageable in $O\left(\frac{m \cdot n}{p}\right)$ if the contents have to be read and re-written. If it is just generated by using pointer-arithmetics, then  it can be even done in $O\left(1\right)$. The complexity of the multiplication one process has to calculate is in $\frac{m \cdot n}{p}$. The complexities of all MPI-functions must be added. MPI\_Allgather,  MPI\_Reduce\_scatter run in $O(n + \log(p))$. As for Reduce\_scatter, the input size is dependent on m (number of rows in matrix $A$), so $(m + \log(p))$ has to be added. As for Allgather, the input size is dependent on $p$, so $(p + \log(p))$ has to be added as well. After simplification, the complexity should be $O\left(\frac{m \cdot n}{p} + m + p\right)$.\\
 
+\noindent The best known sequential algorithm for matrix-vector multiplication runs in $O(m \cdot n)$. However, if we do not use more processes than input columns $n$, both $m$ and $p$ will be dominated by $\frac{m \cdot n}{p}$.\\
+$\displaystyle S_{p}(n)=\frac{T_{seq}(n)}{T_{par}(p,n)} = \frac{m \cdot n}{(m \cdot n)/p } = p$ (if $p \leq\ n$)
+\\[0.5 em]
+In worst case, the speedup is not linear anymore:
+\\[0.5 em]
+$\displaystyle S_{p}(n)=\frac{T_{seq}(n)}{T_{par}(p,n)} = \frac{m \cdot n}{m \cdot n/p + m + p} = \frac{m \cdot n \cdot p}{m \cdot n + p \cdot  m + p^2} = \frac{p}{1 + p/n + p^2/(m \cdot n)} = \frac{n \cdot p}{n + p + p^2/m}$
+\\[0.5 em]
+In not too many processes are used (as stated above), then the parallel efficiency would be 1:
+\\[0.5 em]
+$\displaystyle E_{p}(n)=\frac{T_{seq}(n)}{pT_{par}(p,n)} = \frac{m \cdot n}{p \cdot (m \cdot n)/p} = 1 $
+\\[0.5 em]
+If too many $p$ will be used, the errifiency will turn into:
+\\[0.5 em]
+$\displaystyle E_{p}(n)=\frac{T_{seq}(n)}{pT_{par}(p,n)} = \frac{1}{1 + p/n + p^2/(m \cdot n)} $
+\\[0.5 em]
+As we can see, the efficiency will drop further the more we increase $p$.
+
+\answer{3}
+\includegraphics[scale=0.4,page=1]{../plots/matrix_vector_plot_Column-wise-distribution_300} 
+\includegraphics[scale=0.4,page=1]{../plots/matrix_vector_plot_Column-wise-distribution_600} \\
+\includegraphics[scale=0.4,page=1]{../plots/matrix_vector_plot_Column-wise-distribution_1200} 
+\includegraphics[scale=0.4,page=1]{../plots/matrix_vector_plot_Column-wise-distribution_12000} \\
+
+Similar as with row-wise distribution, for smaller input sizes ($\leq$600) the average time increases with increased processor count. Respectively the absolute speed up decreases. For n=1200 p=128, there seems to be just enough work for each processor for the communication overhead to be worth it, however with p=256, the calculation time increases. For n=12,000 the absolute speed-up is monotonically increasing with increasing processors (at least until p=256). Comparing for n=12,000 column wise distribution has a higher absolute speed up than row-wise, which can be explained by the fact that the column wise algorithm uses fewer communication rounds.
 
 \end{document}

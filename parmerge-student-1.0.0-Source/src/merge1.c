@@ -39,9 +39,3 @@ void merge(double a[], long n, double b[], long m, double c[]) {
         }
     }
 }
-/*
-./bin/merge1_tester -n 10 -m 8 -p 2 -c
-./bin/merge1_tester -n 10000000 -m 20000000 -p 16 -c
-./bin/merge1_tester -n 100000000 -m 200000000 -p 2 -c
-./bin/merge1_tester -n 100000000 -m 200000000 -s
-*/
