@@ -39,13 +39,13 @@ int rank(double val, double Arr[], int n) {
  * If not it is checked if the problem size is already smaller than the cutoff value, then merging is performed sequentially.
  * If this is not the case it is first checked if A is the bigger array, if not the arrays are swapped. After that the element in the middle of
  * A is ranked and inserted into C in the correct psoition, followed with two recursive calls: one with the lower half and one with the upper half
- * of the A and C array
- * @param A: sorted array
- * @param n: length of A
- * @param B: sorted array
- * @param m: legnth of B
- * @param C: array a and b are being merged into
- * @param CUTOFF: cutoff value to stop recursion
+ * of the A and C array. Those recursive calls are realized as tasks.
+ * @param A sorted array
+ * @param n length of A
+ * @param B sorted array
+ * @param m legnth of B
+ * @param C array a and b are being merged into
+ * @param CUTOFF cutoff value to stop recursion
  */
 void divAndConquerMergeSizeBalanceSwap(double A[], long n, double B[], long m, double C[], const long CUTOFF) {
     int i;
