@@ -21,7 +21,7 @@ int rank(double val, double arr[], int n) {
 }
 
 void merge(double a[], long n, double b[], long m, double c[]) {
-#pragma omp parallel
+#pragma omp parallel default(shared|none) shared(a, n, b, c)
     {
         int i;
         int j;
