@@ -18,7 +18,7 @@
 /**
  * @brief This function returns the rank of an element val in the array arr with length n.
  * @param val element that is being ranked
- * @param arr array that is being ranked into
+ * @param A array that is being ranked into
  * @param n length of the array arr
  */
 int rank(double val, double A[], int n) {
@@ -38,11 +38,11 @@ int rank(double val, double A[], int n) {
 /**
  * @brief function that performs the merge.
  * @details ranks and inserts all elements of a into c via parallelized loop, then does the same for elements of b
- * @param a sorted array
+ * @param A sorted array
  * @param n length of a
- * @param b sorted array
+ * @param B sorted array
  * @param m length of b
- * @param c array a and b are being merged into
+ * @param C array a and b are being merged into
  */
 void merge(double A[], long n, double B[], long m, double C[]) {
 #pragma omp parallel
