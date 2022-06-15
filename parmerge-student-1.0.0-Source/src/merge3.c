@@ -36,12 +36,12 @@ int rank(double val, double arr[], int n) {
 void divAndConquerMergeSizeBalanceSwap(double A[], long n, double B[], long m, double C[], const long CUTOFF) {
     int i;
     if (n == 0) {
-#pragma omp taskloop
+#pragma omp taskloop default(shared|none) shared(A, n, B, m, C, CUTOFF, i)
         for (i = 0; i < m; i++) {
             C[i] = B[i];
         }
     } else if (m == 0) {
-#pragma omp taskloop
+#pragma omp taskloop default(shared|none) shared(A, n, B, m, C, CUTOFF, i)
         for (i = 0; i < n; i++) {
             C[i] = A[i];
         }
@@ -60,15 +60,15 @@ void divAndConquerMergeSizeBalanceSwap(double A[], long n, double B[], long m, d
         int r = n >> 1;
         int s = rank(A[r], B, m);
         C[r + s] = A[r];
-#pragma omp task default(none) shared(A, B, C) firstprivate(r, s)
+#pragma omp task default(none) (shared|none) shared(A, B, C) firstprivate(r, s)
         { divAndConquerMergeSizeBalanceSwap(A, r, B, s, C, CUTOFF); }
-#pragma omp task default(none) shared(A, B, C) firstprivate(r, s, m, n)
+#pragma omp task default(none) (shared|none) shared(A, B, C) firstprivate(r, s, m, n)
         { divAndConquerMergeSizeBalanceSwap(&A[r + 1], n - r - 1, &B[s], m - s, &C[r + s + 1], CUTOFF); }
     }
 }
 
 void merge(double A[], long n, double B[], long m, double C[]) {
-#pragma omp parallel
+#pragma omp parallel default(shared|none) shared (A, n, B, m, C)
     {
 #pragma omp master
         {
