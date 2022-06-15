@@ -53,7 +53,7 @@ void mv(base_t **A, int nrows, int ncols, int nrows_a_loc, int ncols_a_loc, base
     alloc_vector(&displs, size);
     displs[0] = 0;
     // p + log(p)
-    MPI_Exscan(&nrows_x_loc, &displs[rank], 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Exscan(&nrows_x_loc, &displs[rank], 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
 
     // p + log(p)
     MPI_Allgather(&nrows_x_loc, 1, MPI_INT, recvcounts, 1, MPI_INT, MPI_COMM_WORLD);
