@@ -22,11 +22,11 @@
  * @param nrows the number of rows of the original matrix (not A)
  * @param ncols the number of columns of the original matrix (not A)
  * @param nrows_a_loc the number of rows this processor has to process the multiplication with
- * @param ncols_a_loc the number of columns this processor has to process the multiplication with (unnecessary here)
- * @param x pointer to a part of the original vector which is multiplied to the original matrix
- * @param nrows_x_loc the number of rows of the original vector whiswere designated to the processor
- * @param b pointer to the result vector b
- * @param ncols_b_loc the number of rows of b which was designated to this processor (unnecessary here)
+ * @param ncols_a_loc the number of columns this processor has to process the multiplication with (==ncols here)
+ * @param x pointer to a part of the original vector which is to be multiplied with the original matrix
+ * @param nrows_x_loc the number of rows of the original vector designated to the processor (length of x)
+ * @param b pointer to a part of the result vector b
+ * @param ncols_b_loc the number of rows of b which was designated to this processor (length of b, equal to nrows_a_loc)
  */
 void mv(base_t **A, int nrows, int ncols, int nrows_a_loc, int ncols_a_loc, base_t *x, int nrows_x_loc, base_t *b, int ncols_b_loc) {
     int rank, size;

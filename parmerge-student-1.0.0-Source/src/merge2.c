@@ -18,26 +18,26 @@
 
 /**
  * @brief returns the minimum of a and b
- * @param a: int variable
- * @param b: int variable
+ * @param a int variable
+ * @param b int variable
  */
 int min(int a, int b) { return (a <= b) ? a : b; }
 
 /**
  * @brief returns the maximum a and b
- * @param a: int variable
- * @param b: int variable
+ * @param a int variable
+ * @param b int variable
  */
 int max(int a, int b) { return (a > b) ? a : b; }
 
 /**
  * @brief sets the coranks corank_a and corank_b for an index i in array c
- * @param i: index in array C for which the coranks are computed
- * @param A: sorted array
- * @param n: length of A
- * @param corank_a: points to the address where the corank of the array A is stored
- * @param B: sorted array
- * @param m: legnth of B
+ * @param i index in array C for which the coranks are computed
+ * @param A sorted array
+ * @param n length of A
+ * @param corank_a points to the address where the corank of the array A is stored
+ * @param B sorted array
+ * @param m legnth of B
  * @param corank_b: points to the address where the corank of the array B is stored
  */
 void corank(int i, double A[], long n, int* corank_a, double B[], long m, int* corank_b) {
@@ -70,11 +70,11 @@ void corank(int i, double A[], long n, int* corank_a, double B[], long m, int* c
  * @brief function that performs the merge.
  * @details array C is partitioned in blocks of size (n+m)/t where t is the number of threads. The coranks of start and end od those are
  * computed via a parallelized for loop. Then also the merging into those blocks is performed in a parallelized for loop
- * @param A: sorted array
- * @param n: length of A
+ * @param A sorted array
+ * @param n length of A
  * @param corank_a points to the address where the corank of the array A is stored
- * @param B: sorted array
- * @param m: legnth of B
+ * @param B sorted array
+ * @param m legnth of B
  * @param corank_b: points to the address where the corank of the array B is stored
  */
 void merge(double A[], long n, double B[], long m, double C[]) {
