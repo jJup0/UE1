@@ -98,6 +98,7 @@ void mv(int m, int n, double M[m][n], double V[n], double W[m])
 \begin{lstlisting}
 void mv(int m, int n, double M[m][n], double V[n], double W[m]){
   par(0<=i<m){
+  	// O(n) parallel time steps
     W[i] = 0.0;
     for(int j = 0; j < n; j++){
       // summing into each cell in result vector 
@@ -143,7 +144,8 @@ void mv(int m, int n, double M[m][n], double V[n], double W[m]) {
 }
 \end{lstlisting}
 \end{minipage}
-Requires the CREW PRAM model (concurrent read on V - no concurrent writes).
+Requires the CREW PRAM model (concurrent read on V - no concurrent writes). \\
+The matrix-vector multiplication requires $O(n \cdot m)$ work. Summation of matrix rows requires $O(n \cdot m)$ work. Copying the result back into the result vector takes $O(n)$ work. This is work optimal, as matrix-vector multiplication requires  $O(n \cdot m)$ work for the best sequential algorithm.
 
 \answer{3}
 \begin{minipage}[t]{1.0\linewidth}
@@ -200,7 +202,8 @@ void mv(int m, int n, double M[m][n], double V[n], double W[m]){
 }
 \end{lstlisting}
 \end{minipage}
-Requires the EREW PRAM model (no concurrent reads or writes).
+Requires the EREW PRAM model (no concurrent reads or writes). \\
+The essential modification (compared to the algorithm from 1.2) is to make copies of the vector before multiplying. This obviously requires more operations, however the work done is still in  $O(n \cdot m)$.
 
 \exercise{2}
 
