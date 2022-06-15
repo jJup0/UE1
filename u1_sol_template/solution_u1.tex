@@ -467,7 +467,8 @@ If we calculate the co-ranks twice per block as follows we can get rid of this s
 \begin{lstlisting}
   if(omp_get_thread_num != t-1){
     corank(omp_get_thread_num() * (n + m) / t, A, n, &coj[i], B, m, &cok[i]);
-    corank((omp_get_thread_num() + 1) * (n + m) / t, A, n, &coj[i], B, m, &cok[i]);
+    corank((omp_get_thread_num() + 1) * (n + m) / t, A, n, &coj[i], B, m, 
+    &cok[i]);
   }
   seq_merge1(&A[coj[i]], coj[omp_get_thread_num + 1] - coj[omp_get_thread_num], 
   &B[cok[i]], cok[omp_get_thread_num + 1] - cok[omp_get_thread_num], 
@@ -549,7 +550,7 @@ As we can see, the efficiency will drop further the more we increase $p$.
 \includegraphics[scale=0.4,page=1]{../plots/matrix_vector_plot_Row-wise-distribution_1200} 
 \includegraphics[scale=0.4,page=1]{../plots/matrix_vector_plot_Row-wise-distribution_12000} \\
 
-For smaller input sizes ($\leq$1200) the average time increases with increased processor count. Respectively the absolute speed up decreases. This can be explained by the fact that the communication required to distribute the vector dominates the time saved by parallelizing the matrix-vector multiplication. For example for n=300, p=256 each processor only receives 1-2 rows, and so only has to do 2 * n (=600) multiplications and additions. For n=12,000 the absolute speed-up is monotonically increasing with increasing processors (at least until p=256). Here each processor has to do around 45 * n (=540,000) multiplications and additions.
+\noindent For smaller input sizes ($\leq$1200) the average time increases with increased processor count. Respectively the absolute speed up decreases. This can be explained by the fact that the communication required to distribute the vector dominates the time saved by parallelizing the matrix-vector multiplication. For example for n=300, p=256 each processor only receives 1-2 rows, and so only has to do 2 * n (=600) multiplications and additions. For n=12,000 the absolute speed-up is monotonically increasing with increasing processors (at least until p=256). Here each processor has to do around 45 * n (=540,000) multiplications and additions.
 
 \exercise{9}
 
@@ -583,6 +584,6 @@ As we can see, the efficiency will drop further the more we increase $p$.
 \includegraphics[scale=0.4,page=1]{../plots/matrix_vector_plot_Column-wise-distribution_1200} 
 \includegraphics[scale=0.4,page=1]{../plots/matrix_vector_plot_Column-wise-distribution_12000} \\
 
-Similar as with row-wise distribution, for smaller input sizes ($\leq$600) the average time increases with increased processor count. Respectively the absolute speed up decreases. For n=1200 p=128, there seems to be just enough work for each processor for the communication overhead to be worth it, however with p=256, the calculation time increases. For n=12,000 the absolute speed-up is monotonically increasing with increasing processors (at least until p=256). Comparing for n=12,000 column wise distribution has a higher absolute speed up than row-wise, which can be explained by the fact that the column wise algorithm uses fewer communication rounds.
+\noindent Similar as with row-wise distribution, for smaller input sizes ($\leq$600) the average time increases with increased processor count. Respectively the absolute speed up decreases. For n=1200 p=128, there seems to be just enough work for each processor for the communication overhead to be worth it, however with p=256, the calculation time increases. For n=12,000 the absolute speed-up is monotonically increasing with increasing processors (at least until p=256). Comparing for n=12,000 column wise distribution has a higher absolute speed up than row-wise, which can be explained by the fact that the column wise algorithm uses fewer communication rounds.
 
 \end{document}
